@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import Response
 
 from app.schemas.projects import (
@@ -13,6 +13,8 @@ from app.schemas.projects import (
     ScriptVersionSummaryResponse,
 )
 from app.services.export_service import export_project_json, export_project_markdown, export_project_yaml
+from app.services.pdf_export_service import export_project_pdf
+from app.services.pdf_export_service import export_project_pdf
 from app.services.project_service import (
     create_project,
     create_version,
@@ -153,3 +155,33 @@ def export_json_endpoint(project_id: int) -> Response:
 def export_markdown_endpoint(project_id: int) -> Response:
     """导出 Markdown 格式"""
     return export_project_markdown(project_id)
+
+
+@router.get(
+    "/{project_id}/export/pdf",
+    summary="导出为 PDF",
+    description="导出为专业格式的 PDF 剧本，包含封面、角色表、场景详情、完整对白",
+    responses={
+        200: {"description": "PDF 文件", "content": {"application/pdf": {}}},
+        400: {"description": "YAML 解析失败"},
+        404: {"description": "项目不存在"},
+    },
+)
+def export_pdf_endpoint(project_id: int) -> Response:
+    """导出 PDF 格式"""
+    from app.services.export_service import _build_filename
+
+    try:
+        project = get_project_detail(project_id)
+        pdf_bytes = export_project_pdf(project)
+
+        filename = _build_filename(project.title, "pdf")
+        headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
+
+        return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
+    except Exception as exc:
+        from fastapi import HTTPException, status
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"PDF 导出失败：{str(exc)}"
+        ) from exc
