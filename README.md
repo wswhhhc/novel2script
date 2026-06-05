@@ -157,50 +157,111 @@ graph LR
 
 ### 系统架构图
 
-<!-- 截图位置：技术架构图 -->
-```
-📸 截图说明（可选）：
-如果有绘制架构图，可以在此插入
-或使用下方的文本架构描述
+```mermaid
+graph TB
+    subgraph 前端层["🖥️ 前端层 (React 18 + TypeScript)"]
+        UI1[📝 NovelInput<br/>小说输入组件]
+        UI2[📋 ChapterList<br/>章节列表]
+        UI3[⚙️ GenerationPanel<br/>生成控制面板]
+        UI4[📄 YamlEditor<br/>Monaco 编辑器]
+        UI5[✅ ValidationPanel<br/>校验结果]
+        UI6[📁 ProjectSidebar<br/>项目管理]
+        UI7[🕐 VersionHistory<br/>版本历史]
+        UI8[📤 ExportPanel<br/>导出面板]
+    end
+
+    subgraph 后端层["⚙️ 后端层 (FastAPI + Python 3.10+)"]
+        subgraph API路由["API 路由层"]
+            R1["/api/parse-chapters"]
+            R2["/api/generate-script"]
+            R3["/api/validate-yaml"]
+            R4["/api/projects/*"]
+        end
+        
+        subgraph 业务逻辑["业务逻辑层 (Services)"]
+            S1[📖 ChapterParser<br/>章节解析]
+            S2[🤖 ScriptGenerator<br/>剧本生成器]
+            S3[✔️ ScriptValidator<br/>Schema 校验]
+            S4[💾 ProjectService<br/>项目管理]
+            S5[📤 ExportService<br/>导出服务]
+            S6[🔧 PromptLoader<br/>Prompt 模板]
+        end
+        
+        subgraph AI集成["AI 集成层"]
+            AI[🧠 AIClient<br/>DeepSeek API<br/>5阶段生成]
+        end
+        
+        subgraph 数据层["数据持久层"]
+            DB[(🗄️ SQLite<br/>projects<br/>script_versions)]
+            SCHEMA[📋 JSON Schema<br/>script.schema.json]
+            PROMPTS[📝 Prompt 模板<br/>01~05.txt]
+        end
+    end
+
+    subgraph 外部服务["☁️ 外部服务"]
+        DEEPSEEK[🌐 DeepSeek API<br/>deepseek-v4-flash]
+    end
+
+    %% 前端到后端
+    UI1 & UI2 & UI3 --> R1
+    UI3 --> R2
+    UI4 & UI5 --> R3
+    UI6 & UI7 & UI8 --> R4
+
+    %% 路由到服务
+    R1 --> S1
+    R2 --> S2
+    R3 --> S3
+    R4 --> S4
+    R4 --> S5
+
+    %% 服务间调用
+    S2 --> S3
+    S2 --> S6
+    S2 --> AI
+    S4 --> S3
+    S5 --> S3
+
+    %% AI 到外部
+    AI --> DEEPSEEK
+
+    %% 数据访问
+    S2 --> SCHEMA
+    S3 --> SCHEMA
+    S6 --> PROMPTS
+    S4 --> DB
+    S5 --> DB
+
+    %% 样式
+    classDef frontend fill:#61dafb,stroke:#333,stroke-width:2px,color:#000
+    classDef backend fill:#009688,stroke:#333,stroke-width:2px,color:#fff
+    classDef ai fill:#ff6b6b,stroke:#333,stroke-width:2px,color:#fff
+    classDef data fill:#4caf50,stroke:#333,stroke-width:2px,color:#fff
+    classDef external fill:#ffd93d,stroke:#333,stroke-width:2px,color:#000
+
+    class UI1,UI2,UI3,UI4,UI5,UI6,UI7,UI8 frontend
+    class R1,R2,R3,R4,S1,S2,S3,S4,S5,S6 backend
+    class AI ai
+    class DB,SCHEMA,PROMPTS data
+    class DEEPSEEK external
 ```
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      前端层（React 18）                       │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
-│  │ 输入组件 │  │ 生成面板 │  │ YAML编辑 │  │ 项目管理 │   │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘   │
-│       │             │              │             │          │
-│       └─────────────┴──────────────┴─────────────┘          │
-│                          │                                   │
-│                    Fetch API (HTTP)                          │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-┌──────────────────────────┴──────────────────────────────────┐
-│                   后端层（FastAPI）                           │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │              API 路由层（Routers）                      │  │
-│  │  /api/parse-chapters  /api/generate-script  /api/...  │  │
-│  └─────────────────────┬────────────────────────────────┘  │
-│                        │                                     │
-│  ┌─────────────────────┴────────────────────────────────┐  │
-│  │              业务逻辑层（Services）                      │  │
-│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌─────────┐ │  │
-│  │  │章节解析器│ │剧本生成器│ │Schema校验│ │项目服务 │ │  │
-│  │  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬────┘ │  │
-│  └───────┼────────────┼────────────┼──────────────┼──────┘  │
-│          │            │            │              │          │
-│          │      ┌─────┴──────┐     │              │          │
-│          │      │ AI Client  │     │              │          │
-│          │      │  (DeepSeek) │     │              │          │
-│          │      └────────────┘     │              │          │
-│          │                         │              │          │
-│  ┌───────┴─────────────────────────┴──────────────┴──────┐  │
-│  │              数据持久层（SQLite）                        │  │
-│  │          projects 表  +  script_versions 表           │  │
-│  └──────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-```
+#### 架构说明
+
+**分层设计**：
+- **前端层**：8 个核心组件，使用 React Hooks 进行状态管理
+- **API 路由层**：RESTful API 设计，统一 `/api` 前缀
+- **业务逻辑层**：6 个服务模块，关注点分离
+- **AI 集成层**：封装 DeepSeek API 调用，支持 5 阶段生成
+- **数据持久层**：SQLite 轻量级存储 + JSON Schema 约束
+
+**数据流向**：
+1. 用户上传小说 → ChapterParser 识别章节
+2. 触发生成 → ScriptGenerator 调用 AIClient
+3. AIClient 5 阶段调用 DeepSeek API
+4. 返回 YAML → ScriptValidator 校验
+5. 用户编辑 → ProjectService 保存到 SQLite
+6. 导出 → ExportService 多格式转换
 
 ### 技术栈
 
