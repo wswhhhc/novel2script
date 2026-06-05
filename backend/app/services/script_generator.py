@@ -2,6 +2,7 @@
 剧本生成服务
 实现分阶段 AI 生成流程：章节分析 -> 角色提取 -> 场景规划 -> 剧本生成 -> YAML 修复
 """
+
 import re
 
 import yaml
@@ -64,8 +65,7 @@ def generate_script_with_ai(title: str, genre: str, chapters: list[ChapterInput]
     try:
         # 准备章节数据
         chapters_data = [
-            {"id": ch.id, "title": ch.title, "content": ch.content, "word_count": ch.word_count}
-            for ch in chapters
+            {"id": ch.id, "title": ch.title, "content": ch.content, "word_count": ch.word_count} for ch in chapters
         ]
         chapters_text = format_chapters_for_prompt(_trim_chapters_for_ai_prompt(chapters_data))
 

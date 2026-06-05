@@ -22,8 +22,7 @@ def iter_connection() -> Iterator[sqlite3.Connection]:
 
 def init_database() -> None:
     with get_connection() as connection:
-        connection.executescript(
-            """
+        connection.executescript("""
             CREATE TABLE IF NOT EXISTS projects (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
@@ -51,5 +50,4 @@ def init_database() -> None:
 
             CREATE INDEX IF NOT EXISTS idx_projects_updated_at ON projects(updated_at DESC);
             CREATE INDEX IF NOT EXISTS idx_script_versions_project_id ON script_versions(project_id, created_at DESC);
-            """
-        )
+            """)

@@ -10,7 +10,13 @@ interface VersionHistoryProps {
   onRestoreVersion: (version: ScriptVersionSummary) => void;
 }
 
-export function VersionHistory({ versions, hasProject, loading, onCreateVersion, onRestoreVersion }: VersionHistoryProps) {
+export function VersionHistory({
+  versions,
+  hasProject,
+  loading,
+  onCreateVersion,
+  onRestoreVersion,
+}: VersionHistoryProps) {
   return (
     <section className="version-panel">
       <div className="panel-head slim">
@@ -18,7 +24,13 @@ export function VersionHistory({ versions, hasProject, loading, onCreateVersion,
           <p className="panel-kicker">版本</p>
           <h2>版本历史</h2>
         </div>
-        <button type="button" className="icon-button" onClick={onCreateVersion} disabled={!hasProject || loading} title="保存版本快照">
+        <button
+          type="button"
+          className="icon-button"
+          onClick={onCreateVersion}
+          disabled={!hasProject || loading}
+          title="保存版本快照"
+        >
           {loading ? <span className="spinner" /> : <Save className="h-4 w-4" aria-hidden="true" />}
           <span>快照</span>
         </button>
@@ -38,7 +50,12 @@ export function VersionHistory({ versions, hasProject, loading, onCreateVersion,
                 <span>{formatDateTime(version.created_at)}</span>
                 {version.note ? <small>{version.note}</small> : null}
               </div>
-              <button type="button" className="icon-button tiny" onClick={() => onRestoreVersion(version)} title="恢复此版本">
+              <button
+                type="button"
+                className="icon-button tiny"
+                onClick={() => onRestoreVersion(version)}
+                title="恢复此版本"
+              >
                 <RotateCcw className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>

@@ -32,7 +32,8 @@ export function GenerationPanel({
   onGenerate,
 }: GenerationPanelProps) {
   const generationProgress = generating ? 60 : validating ? 100 : 0;
-  const modeLabel = generationMode?.mode === "ai" ? "AI 模式" : generationMode?.mode === "mock" ? "Mock 模式" : "模式未知";
+  const modeLabel =
+    generationMode?.mode === "ai" ? "AI 模式" : generationMode?.mode === "mock" ? "Mock 模式" : "模式未知";
   const modeClass = generationMode?.mode === "ai" ? "ai" : "neutral";
 
   return (
@@ -49,12 +50,22 @@ export function GenerationPanel({
       </div>
 
       <div className="action-stack">
-        <button type="button" className="primary-button" onClick={onParse} disabled={!canParse || parsing || generating}>
+        <button
+          type="button"
+          className="primary-button"
+          onClick={onParse}
+          disabled={!canParse || parsing || generating}
+        >
           {parsing ? <span className="spinner" /> : <ScanText className="h-4 w-4" aria-hidden="true" />}
           {parsing ? "正在识别章节" : "识别章节"}
         </button>
 
-        <button type="button" className="primary-button dark" onClick={onGenerate} disabled={!canGenerate || generating || parsing}>
+        <button
+          type="button"
+          className="primary-button dark"
+          onClick={onGenerate}
+          disabled={!canGenerate || generating || parsing}
+        >
           {generating ? <span className="spinner light" /> : <FileCode2 className="h-4 w-4" aria-hidden="true" />}
           {generating ? "正在生成 YAML 剧本" : "生成剧本"}
         </button>

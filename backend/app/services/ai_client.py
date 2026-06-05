@@ -4,6 +4,7 @@ AI 模型调用客户端。
 默认自动化测试不应触发真实网络请求；只有 ENABLE_AI_GENERATION=true 且配置
 MODEL_API_KEY 后才会调用模型。
 """
+
 import json
 import time
 from typing import Any

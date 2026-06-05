@@ -11,7 +11,14 @@ interface SaveProjectDialogProps {
   onSubmit: (title: string, genre: string) => void;
 }
 
-export function SaveProjectDialog({ open, initialTitle, initialGenre, mode, onClose, onSubmit }: SaveProjectDialogProps) {
+export function SaveProjectDialog({
+  open,
+  initialTitle,
+  initialGenre,
+  mode,
+  onClose,
+  onSubmit,
+}: SaveProjectDialogProps) {
   const [title, setTitle] = useState(initialTitle);
   const [genre, setGenre] = useState(initialGenre);
   const headingId = useId();
@@ -53,18 +60,28 @@ export function SaveProjectDialog({ open, initialTitle, initialGenre, mode, onCl
   }
 
   return (
-    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => {
-      if (event.target === event.currentTarget) {
-        onClose();
-      }
-    }}>
+    <div
+      className="modal-backdrop"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       <form className="modal-panel" role="dialog" aria-modal="true" aria-labelledby={headingId} onSubmit={handleSubmit}>
         <div className="panel-head">
           <div>
             <p className="panel-kicker">保存</p>
             <h2 id={headingId}>{mode === "copy" ? "另存为项目" : "保存当前项目"}</h2>
           </div>
-          <button type="button" className="icon-button tiny" onClick={onClose} title="关闭" aria-label="关闭保存项目弹窗">
+          <button
+            type="button"
+            className="icon-button tiny"
+            onClick={onClose}
+            title="关闭"
+            aria-label="关闭保存项目弹窗"
+          >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
@@ -80,8 +97,12 @@ export function SaveProjectDialog({ open, initialTitle, initialGenre, mode, onCl
         </label>
 
         <div className="modal-actions">
-          <button type="button" className="ghost-button" onClick={onClose}>取消</button>
-          <button type="submit" className="primary-button" disabled={!title.trim() || !genre.trim()}>保存</button>
+          <button type="button" className="ghost-button" onClick={onClose}>
+            取消
+          </button>
+          <button type="submit" className="primary-button" disabled={!title.trim() || !genre.trim()}>
+            保存
+          </button>
         </div>
       </form>
     </div>

@@ -3,7 +3,6 @@ from fastapi.testclient import TestClient
 from app.config.settings import settings
 from app.main import app
 
-
 client = TestClient(app)
 
 
@@ -17,16 +16,14 @@ def test_health_endpoint():
 def test_parse_chapters_endpoint():
     response = client.post(
         "/api/chapters/parse",
-        json={
-            "content": """
+        json={"content": """
 第一章 雨夜来客
 正文一。
 二、旧案
 正文二。
 卷一 第三章 暗巷追踪
 正文三。
-"""
-        },
+"""},
     )
 
     assert response.status_code == 200
@@ -90,8 +87,7 @@ def test_generate_script_ai_mode_missing_api_key_returns_clear_error(monkeypatch
 
 def test_generate_script_rejects_too_many_chapters():
     chapters = [
-        {"id": f"C{index:03d}", "title": f"第{index}章", "content": "正文", "word_count": 2}
-        for index in range(1, 22)
+        {"id": f"C{index:03d}", "title": f"第{index}章", "content": "正文", "word_count": 2} for index in range(1, 22)
     ]
 
     response = client.post(

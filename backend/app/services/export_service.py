@@ -86,9 +86,10 @@ def _to_markdown(document: Any) -> str:
     if characters:
         for character in characters:
             if isinstance(character, dict):
-                lines.append(
-                    f"| {_text(character.get('id'), '')} | {_text(character.get('name'), '')} | {_text(character.get('description'), '')} |"
-                )
+                char_id = _text(character.get("id"), "")
+                char_name = _text(character.get("name"), "")
+                char_desc = _text(character.get("description"), "")
+                lines.append(f"| {char_id} | {char_name} | {char_desc} |")
     else:
         lines.append("| - | - | 未提供角色信息 |")
 
@@ -136,7 +137,7 @@ def _build_filename(title: str, extension: str) -> str:
 
 def _content_disposition(filename: str) -> str:
     fallback = ASCII_FILENAME_RE.sub("_", filename).strip("_") or "novel2script_script"
-    return f'attachment; filename="{fallback}"; filename*=UTF-8\'\'{quote(filename)}'
+    return f"attachment; filename=\"{fallback}\"; filename*=UTF-8''{quote(filename)}"
 
 
 def _text(value: Any, fallback: Any = "") -> str:

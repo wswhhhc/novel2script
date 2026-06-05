@@ -51,7 +51,11 @@ export function FileUpload({ onLoaded, onError }: FileUploadProps) {
           event.target.value = "";
         }}
       />
-      <button type="button" className="secondary-button w-full justify-center" onClick={() => inputRef.current?.click()}>
+      <button
+        type="button"
+        className="secondary-button w-full justify-center"
+        onClick={() => inputRef.current?.click()}
+      >
         <Upload className="h-4 w-4" aria-hidden="true" />
         上传 TXT / MD
       </button>

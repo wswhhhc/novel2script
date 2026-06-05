@@ -45,15 +45,36 @@ export function YamlEditor({ title, yamlText, validation, validating, onYamlChan
           <h2>YAML 剧本</h2>
         </div>
         <div className="toolbar">
-          <button type="button" className="icon-button" onClick={handleCopy} disabled={!hasYaml} title="复制 YAML" aria-label="复制 YAML">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={handleCopy}
+            disabled={!hasYaml}
+            title="复制 YAML"
+            aria-label="复制 YAML"
+          >
             <Clipboard className="h-4 w-4" aria-hidden="true" />
             <span>{copyState}</span>
           </button>
-          <button type="button" className="icon-button" onClick={handleDownload} disabled={!hasYaml} title="下载 YAML" aria-label="下载 YAML">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={handleDownload}
+            disabled={!hasYaml}
+            title="下载 YAML"
+            aria-label="下载 YAML"
+          >
             <Download className="h-4 w-4" aria-hidden="true" />
             <span>下载</span>
           </button>
-          <button type="button" className="icon-button strong" onClick={onValidate} disabled={!hasYaml || validating} title="重新校验" aria-label="重新校验 YAML">
+          <button
+            type="button"
+            className="icon-button strong"
+            onClick={onValidate}
+            disabled={!hasYaml || validating}
+            title="重新校验"
+            aria-label="重新校验 YAML"
+          >
             {validating ? <span className="spinner" /> : <RotateCw className="h-4 w-4" aria-hidden="true" />}
             <span>{validating ? "校验中" : "校验"}</span>
           </button>

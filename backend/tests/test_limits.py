@@ -4,15 +4,11 @@ from app.config.settings import settings
 from app.main import app
 from app.services.chapter_parser import parse_chapters
 
-
 client = TestClient(app)
 
 
 def _chapters_text(count: int, body_length: int) -> str:
-    return "\n".join(
-        f"第{index}章 测试章节{index}\n{'内' * body_length}"
-        for index in range(1, count + 1)
-    )
+    return "\n".join(f"第{index}章 测试章节{index}\n{'内' * body_length}" for index in range(1, count + 1))
 
 
 def test_tc008_input_near_limit_is_accepted():

@@ -1,0 +1,19 @@
+[tool.black]
+line-length = 120
+target-version = ['py311']
+exclude = '''
+/(
+    \.git
+  | __pycache__
+  | \.pytest_cache
+  | venv
+  | env
+  | \.venv
+  | data
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 120
+skip_glob = ["venv", "env", ".venv", "data"]

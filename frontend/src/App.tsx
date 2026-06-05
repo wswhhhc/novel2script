@@ -70,7 +70,10 @@ function App() {
   const hasYaml = yamlText.trim().length > 0;
   const currentProjectId = currentProject?.id ?? null;
 
-  const totalWords = useMemo(() => parseResult?.chapters.reduce((sum, chapter) => sum + chapter.word_count, 0) ?? 0, [parseResult]);
+  const totalWords = useMemo(
+    () => parseResult?.chapters.reduce((sum, chapter) => sum + chapter.word_count, 0) ?? 0,
+    [parseResult]
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -394,7 +397,10 @@ function App() {
       applyProject(project);
       await loadProjects();
       await loadVersions(project.id);
-      setStatus({ tone: project.validation.valid ? "success" : "warning", message: `已恢复到版本：${version.version_name}` });
+      setStatus({
+        tone: project.validation.valid ? "success" : "warning",
+        message: `已恢复到版本：${version.version_name}`,
+      });
     } catch (error) {
       setStatus({ tone: "error", message: error instanceof Error ? error.message : "版本恢复失败" });
     } finally {
@@ -454,7 +460,9 @@ function App() {
       <header className="topbar">
         <div>
           <h1>Novel2Script 工作台</h1>
-          <p>当前项目：{currentProject ? currentProject.title : "未保存项目"} · {dirty ? "有未保存修改" : "已保存"}</p>
+          <p>
+            当前项目：{currentProject ? currentProject.title : "未保存项目"} · {dirty ? "有未保存修改" : "已保存"}
+          </p>
         </div>
         <div className="topbar-actions">
           <div className="topbar-metrics" aria-label="工作台统计">
@@ -463,15 +471,31 @@ function App() {
             <span>{totalWords.toLocaleString()} 字已识别</span>
           </div>
           <div className="toolbar">
-            <button type="button" className="icon-button strong" onClick={handleSave} disabled={saving || !hasYaml} title="保存项目">
+            <button
+              type="button"
+              className="icon-button strong"
+              onClick={handleSave}
+              disabled={saving || !hasYaml}
+              title="保存项目"
+            >
               {saving ? <span className="spinner" /> : <Save className="h-4 w-4" aria-hidden="true" />}
               <span>保存</span>
             </button>
-            <button type="button" className="icon-button" onClick={handleSaveAs} disabled={saving || !hasYaml} title="另存为项目">
+            <button
+              type="button"
+              className="icon-button"
+              onClick={handleSaveAs}
+              disabled={saving || !hasYaml}
+              title="另存为项目"
+            >
               <CopyPlus className="h-4 w-4" aria-hidden="true" />
               <span>另存为</span>
             </button>
-            <ExportPanel disabled={!currentProject || exporting !== null} exporting={exporting} onExport={handleExport} />
+            <ExportPanel
+              disabled={!currentProject || exporting !== null}
+              exporting={exporting}
+              onExport={handleExport}
+            />
           </div>
         </div>
       </header>

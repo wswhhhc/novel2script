@@ -3,7 +3,6 @@ from fastapi.testclient import TestClient
 from app.config.settings import settings
 from app.main import app
 
-
 client = TestClient(app)
 
 CHAPTERS = [
@@ -99,7 +98,12 @@ def test_create_and_list_versions():
 
     response = client.post(
         f"/api/projects/{project_id}/versions",
-        json={"version_name": "初稿 v1", "yaml": _sample_yaml(), "validation": {"valid": True, "errors": []}, "note": "初稿"},
+        json={
+            "version_name": "初稿 v1",
+            "yaml": _sample_yaml(),
+            "validation": {"valid": True, "errors": []},
+            "note": "初稿",
+        },
     )
     list_response = client.get(f"/api/projects/{project_id}/versions")
 
@@ -115,7 +119,12 @@ def test_version_detail_and_restore_updates_current_yaml():
     changed_yaml = original_yaml.replace("长夜初逢", "版本恢复标题", 1)
     version_response = client.post(
         f"/api/projects/{project_id}/versions",
-        json={"version_name": "恢复目标", "yaml": changed_yaml, "validation": {"valid": True, "errors": []}, "note": ""},
+        json={
+            "version_name": "恢复目标",
+            "yaml": changed_yaml,
+            "validation": {"valid": True, "errors": []},
+            "note": "",
+        },
     )
     version_id = version_response.json()["id"]
 

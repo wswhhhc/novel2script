@@ -5,7 +5,6 @@ from app.main import app
 from app.services.chapter_parser import parse_chapters
 from app.services.script_validator import validate_script_yaml
 
-
 client = TestClient(app)
 
 

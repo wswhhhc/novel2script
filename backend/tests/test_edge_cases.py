@@ -4,7 +4,6 @@ from app.config.settings import settings
 from app.main import app
 from app.services.chapter_parser import parse_chapters
 
-
 client = TestClient(app)
 
 

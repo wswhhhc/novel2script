@@ -56,13 +56,11 @@ def create_project(payload: ProjectCreateRequest) -> ProjectSummaryResponse:
 
 def list_projects() -> list[ProjectSummaryResponse]:
     with get_connection() as connection:
-        rows = connection.execute(
-            """
+        rows = connection.execute("""
             SELECT id, title, genre, chapter_count, generation_mode, created_at, updated_at
             FROM projects
             ORDER BY updated_at DESC, id DESC
-            """
-        ).fetchall()
+            """).fetchall()
     return [_row_to_summary(row) for row in rows]
 
 

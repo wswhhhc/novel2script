@@ -43,7 +43,11 @@ export function NovelInput({
 
       <label className="field">
         <span>小说标题</span>
-        <input value={title} onChange={(event) => onTitleChange(event.target.value)} placeholder="用于生成和下载文件名" />
+        <input
+          value={title}
+          onChange={(event) => onTitleChange(event.target.value)}
+          placeholder="用于生成和下载文件名"
+        />
       </label>
 
       <label className="field">

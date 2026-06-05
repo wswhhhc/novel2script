@@ -32,9 +32,7 @@ export function ChapterList({ result }: ChapterListProps) {
           <p className="panel-kicker">章节</p>
           <h2>识别结果</h2>
         </div>
-        <span className={`badge ${result.valid ? "success" : "error"}`}>
-          {result.valid ? "可生成" : "需处理"}
-        </span>
+        <span className={`badge ${result.valid ? "success" : "error"}`}>{result.valid ? "可生成" : "需处理"}</span>
       </div>
 
       <StatusBanner tone={result.valid ? "success" : "error"} message={result.message} />
@@ -69,7 +67,10 @@ export function ChapterList({ result }: ChapterListProps) {
               <span className="chapter-count">{chapter.word_count.toLocaleString()} 字</span>
               <ChevronDown className="summary-icon h-4 w-4" aria-hidden="true" />
             </summary>
-            <p>{chapter.content.slice(0, 260)}{chapter.content.length > 260 ? "..." : ""}</p>
+            <p>
+              {chapter.content.slice(0, 260)}
+              {chapter.content.length > 260 ? "..." : ""}
+            </p>
           </details>
         ))}
       </div>

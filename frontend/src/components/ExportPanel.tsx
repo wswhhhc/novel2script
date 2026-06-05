@@ -25,7 +25,11 @@ export function ExportPanel({ disabled, exporting, onExport }: ExportPanelProps)
           disabled={disabled || exporting !== null}
           title={`导出 ${format.label}`}
         >
-          {exporting === format.value ? <span className="spinner" /> : <Download className="h-4 w-4" aria-hidden="true" />}
+          {exporting === format.value ? (
+            <span className="spinner" />
+          ) : (
+            <Download className="h-4 w-4" aria-hidden="true" />
+          )}
           <span>{format.label}</span>
         </button>
       ))}

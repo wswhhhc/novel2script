@@ -15,7 +15,10 @@ export function downloadBlob(blob: Blob, fileName: string) {
 }
 
 export function buildYamlFileName(title: string) {
-  const normalized = title.trim().replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, "-");
+  const normalized = title
+    .trim()
+    .replace(/[\\/:*?"<>|]+/g, "-")
+    .replace(/\s+/g, "-");
   const stamp = new Date().toISOString().slice(0, 10);
   return `${normalized || "novel2script"}-${stamp}.yaml`;
 }

@@ -1,9 +1,9 @@
 """
 Prompt 模板加载和变量替换服务
 """
+
 import json
 import re
-from pathlib import Path
 
 from app.config.settings import settings
 
