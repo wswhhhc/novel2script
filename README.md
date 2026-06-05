@@ -123,97 +123,34 @@ graph LR
 ### 系统架构图
 
 ```mermaid
-flowchart TB
-    USER([创作者 / 编剧]):::actor
+flowchart LR
+    USER([创作者]) --> WEB["React Web<br/>输入 / 编辑 / 项目管理"]
+    WEB --> API["FastAPI<br/>统一 API"]
 
-    subgraph CLIENT["客户端体验层 | React + TypeScript"]
-        INPUT["创作工作台<br/>小说输入 / 文件上传 / 章节列表"]:::frontend
-        GENERATE["生成控制台<br/>五阶段进度 / Mock-AI 切换"]:::frontend
-        EDITOR["剧本编辑区<br/>Monaco YAML 编辑 / 实时校验"]:::frontend
-        PROJECTS["项目资产区<br/>项目列表 / 版本历史 / 多格式导出"]:::frontend
-    end
+    API --> SERVICES["核心服务<br/>章节解析 / AI 生成 / 校验 / 导出"]
+    SERVICES --> AI["AI 模型<br/>DeepSeek / OpenAI Compatible"]
+    SERVICES --> SCHEMA["JSON Schema<br/>约束剧本结构"]
+    SERVICES --> DB[(SQLite<br/>项目与版本)]
 
-    subgraph API["API 边界层 | FastAPI Routers"]
-        CHAPTER_API["chapters.py<br/>/api/parse-chapters"]:::api
-        SCRIPT_API["script.py<br/>/api/generate-script<br/>/api/validate-yaml"]:::api
-        PROJECT_API["projects.py<br/>/api/projects/*"]:::api
-    end
+    SERVICES --> OUTPUT["剧本输出<br/>YAML / JSON / Markdown"]
+    OUTPUT --> WEB
 
-    subgraph DOMAIN["领域服务层 | Python Services"]
-        PARSER["ChapterParser<br/>章节识别与文本切分"]:::service
-        GENERATOR["ScriptGenerator<br/>五阶段剧本生成编排"]:::service
-        VALIDATOR["ScriptValidator<br/>YAML Schema 校验"]:::service
-        PROJECT_SERVICE["ProjectService<br/>项目 CRUD / 版本快照"]:::service
-        EXPORT_SERVICE["ExportService<br/>YAML / JSON / Markdown 导出"]:::service
-    end
-
-    subgraph AI_PIPELINE["AI 生成链路 | 可 Mock / 可替换模型"]
-        PROMPT_LOADER["PromptLoader<br/>加载 01~05 阶段模板"]:::ai
-        AI_CLIENT["AIClient<br/>OpenAI Compatible API"]:::ai
-        STAGES["章节分析 → 角色提取 → 场景规划 → 剧本生成 → YAML 修复"]:::ai
-    end
-
-    subgraph RESOURCES["数据与规则层"]
-        DB[(SQLite<br/>projects / script_versions)]:::data
-        SCHEMA["script.schema.json<br/>剧本结构约束"]:::data
-        PROMPTS["prompts/*.txt<br/>生成策略模板"]:::data
-        EXAMPLES["examples/*.yaml / *.txt<br/>演示与校验样例"]:::data
-    end
-
-    subgraph EXTERNAL["外部能力"]
-        MODEL["DeepSeek / GPT / Claude 等<br/>OpenAI Compatible Model"]:::external
-    end
-
-    USER --> INPUT
-    USER --> EDITOR
-    USER --> PROJECTS
-
-    INPUT -->|"解析章节"| CHAPTER_API
-    GENERATE -->|"生成剧本"| SCRIPT_API
-    EDITOR -->|"校验 YAML"| SCRIPT_API
-    PROJECTS -->|"保存 / 恢复 / 导出"| PROJECT_API
-
-    CHAPTER_API --> PARSER
-    SCRIPT_API --> GENERATOR
-    SCRIPT_API --> VALIDATOR
-    PROJECT_API --> PROJECT_SERVICE
-    PROJECT_API --> EXPORT_SERVICE
-
-    PARSER -.返回章节列表.-> GENERATE
-    GENERATOR --> PROMPT_LOADER
-    GENERATOR --> AI_CLIENT
-    GENERATOR --> VALIDATOR
-    PROJECT_SERVICE --> VALIDATOR
-    EXPORT_SERVICE --> VALIDATOR
-
-    PROMPT_LOADER --> PROMPTS
-    PROMPT_LOADER --> STAGES
-    AI_CLIENT --> STAGES
-    AI_CLIENT --> MODEL
-    STAGES -.生成中间结果.-> GENERATOR
-
-    VALIDATOR --> SCHEMA
-    PROJECT_SERVICE --> DB
-    EXPORT_SERVICE --> DB
-    INPUT -.演示数据.-> EXAMPLES
-
-    classDef actor fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
-    classDef frontend fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0c4a6e
-    classDef api fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
-    classDef service fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12
-    classDef ai fill:#fae8ff,stroke:#c026d3,stroke-width:2px,color:#581c87
-    classDef data fill:#f1f5f9,stroke:#64748b,stroke-width:2px,color:#0f172a
+    classDef main fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e
+    classDef service fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
+    classDef data fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
     classDef external fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+
+    class USER,WEB,API,OUTPUT main
+    class SERVICES service
+    class SCHEMA,DB data
+    class AI external
 ```
 
 #### 架构说明
 
-**分层设计**：
-- **客户端体验层**：围绕“输入 → 生成 → 编辑 → 管理/导出”的创作工作流组织界面
-- **API 边界层**：FastAPI 统一暴露 `/api` 接口，隔离前端交互与后端实现
-- **领域服务层**：章节解析、剧本生成、Schema 校验、项目版本、格式导出各司其职
-- **AI 生成链路**：Prompt 模板 + AIClient 统一编排，支持 Mock 模式和 OpenAI Compatible 模型替换
-- **数据与规则层**：SQLite 保存项目资产，JSON Schema 约束剧本结构，examples 支撑演示与回归验证
+这张图只展示 README 里最需要理解的主链路：前端负责创作交互，FastAPI 负责统一接口，核心服务负责编排章节解析、AI 生成、Schema 校验、项目版本和导出。
+
+更细的模块拆分见 [架构设计](docs/architecture-overview.md) 和 [项目结构说明](docs/project-structure.md)。
 
 **数据流向**：
 1. 用户上传小说 → ChapterParser 识别章节
