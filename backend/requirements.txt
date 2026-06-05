@@ -6,3 +6,4 @@ jsonschema
 pytest
 httpx
 openai
+python-dotenv
