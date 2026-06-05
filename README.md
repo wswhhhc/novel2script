@@ -668,33 +668,30 @@ bash scripts/smoke-test.sh
 
 ## 👥 团队信息
 
-<!-- 根据实际情况填写 -->
-```
-📸 截图位置（可选）：团队成员照片或组织架构图
-```
+## 👥 团队信息
 
-**开发团队**：[填写你的团队名称或成员]
+**开发者**：wswhhhc
 
-**指导老师**：[如果有，填写导师信息]
-
-**比赛信息**：[填写参赛的比赛名称]
+**比赛信息**：七牛云暑期实训
 
 ---
 
 ## 📞 联系方式
 
-- 📧 邮箱：[your-email@example.com]
-- 🌐 项目主页：[项目链接]
-- 💬 问题反馈：[Issue Tracker 链接]
+- 📧 邮箱：wswhhhc@outlook.com
+- 🌐 项目主页：https://github.com/wswhhhc/novel2script
+- 💬 问题反馈：https://github.com/wswhhhc/novel2script/issues
 
 ---
 
 <div align="center">
 
-### ⭐ 如果这个项目对你有帮助，请给我们一个 Star！
+### ⭐ 如果这个项目对你有帮助，请给我一个 Star！
 
 **Novel2Script** - 让每一个故事都能成为精彩剧本 🎬
 
-Made with ❤️ by [Your Team Name]
+Made with ❤️ by wswhhhc
+
+</div>
 
 </div>
