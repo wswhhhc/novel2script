@@ -66,13 +66,37 @@
 ![AI 生成流程](docs/images/screenshot-2-generation-process.png)
 
 ```mermaid
-graph LR
-    A[📖 小说章节] --> B[🔍 章节分析]
-    B --> C[👥 角色提取]
-    C --> D[🎬 场景规划]
-    D --> E[📝 剧本生成]
-    E --> F[✅ YAML 修复]
-    F --> G[🎭 结构化剧本]
+graph TB
+    START["📚 输入：小说文本<br/>(3-20 章，最多 5 万字)"] --> S1
+    
+    S1["🔍 阶段 1：章节分析<br/><br/>📥 输入：原始章节文本<br/>🤖 处理：AI 提取结构化信息<br/>📤 输出：JSON 格式摘要<br/><br/>包含：人物、事件、情节转折"]
+    
+    S1 --> S2["👥 阶段 2：角色提取<br/><br/>📥 输入：章节分析结果<br/>🤖 处理：AI 跨章节统一角色<br/>📤 输出：角色表（ID + 关系）<br/><br/>✨ 亮点：自动去重和合并同名角色"]
+    
+    S2 --> S3["🎬 阶段 3：场景规划<br/><br/>📥 输入：角色表 + 章节分析<br/>🤖 处理：AI 拆分场景大纲<br/>📤 输出：场景列表（时空标注）<br/><br/>✨ 亮点：时空连续性自动校验"]
+    
+    S3 --> S4["📝 阶段 4：剧本生成<br/><br/>📥 输入：前 3 阶段全部结果<br/>🤖 处理：AI 生成完整剧本<br/>📤 输出：结构化 YAML<br/><br/>✨ 亮点：强制符合 JSON Schema"]
+    
+    S4 --> CHECK{"🔍 Schema 校验<br/><br/>检查：<br/>· ID 格式规范<br/>· 必填字段完整<br/>· 引用关系有效"}
+    
+    CHECK -->|✅ 通过| OUTPUT["🎭 最终输出<br/><br/>结构化剧本包含：<br/>· 统一角色表<br/>· 场景列表<br/>· 完整对白<br/>· 改编说明"]
+    
+    CHECK -->|❌ 失败| S5["🔧 阶段 5：自动修复<br/><br/>📥 输入：YAML + 错误信息<br/>🤖 处理：AI 定位并修复错误<br/>📤 输出：修复后的 YAML<br/><br/>✨ 亮点：最多迭代 3 次"]
+    
+    S5 --> CHECK
+    
+    S5 -.->|3 次后仍失败| FALLBACK["⚠️ 返回部分结果<br/>+ 错误报告"]
+    
+    classDef stage fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e
+    classDef highlight fill:#fef3c7,stroke:#d97706,stroke-width:3px,color:#78350f
+    classDef decision fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+    classDef success fill:#dcfce7,stroke:#16a34a,stroke-width:3px,color:#14532d
+    
+    class START,S1,S2,S3,S4 stage
+    class S5 highlight
+    class CHECK decision
+    class OUTPUT success
+    class FALLBACK decision
 ```
 
 | 阶段 | 输入 | 输出 | 技术亮点 |
@@ -130,45 +154,60 @@ graph LR
 
 ## 🏗️ 技术架构
 
+> 💡 **核心创新**：业界首创的五阶段 AI 生成链路 + 332 行 Schema 约束，确保剧本质量和结构完整性
+
 ### 系统架构图
 
 ```mermaid
-flowchart LR
-    USER([创作者]) --> WEB["React Web<br/>输入 / 编辑 / 项目管理"]
-    WEB --> API["FastAPI<br/>统一 API"]
-
-    API --> SERVICES["核心服务<br/>章节解析 / AI 生成 / 校验 / 导出"]
-    SERVICES --> AI["AI 模型<br/>DeepSeek / OpenAI Compatible"]
-    SERVICES --> SCHEMA["JSON Schema<br/>约束剧本结构"]
-    SERVICES --> DB[(SQLite<br/>项目与版本)]
-
-    SERVICES --> OUTPUT["剧本输出<br/>YAML / JSON / Markdown"]
-    OUTPUT --> WEB
-
+flowchart TB
+    USER([👤 创作者]) --> WEB["🌐 React 前端<br/>小说输入 · YAML 编辑 · 项目管理"]
+    
+    WEB --> API["⚡ FastAPI 统一接口<br/>RESTful API"]
+    
+    API --> PARSER["📖 章节解析器<br/>支持 8+ 种格式"]
+    API --> GENERATOR["⭐ 五阶段 AI 生成引擎<br/>章节分析 → 角色提取 → 场景规划<br/>→ 剧本生成 → 自动修复"]
+    API --> VALIDATOR["✅ Schema 校验器<br/>332 行约束规则"]
+    API --> PROJECT["💾 项目服务<br/>版本快照与恢复"]
+    API --> EXPORT["📦 导出服务<br/>YAML · JSON · Markdown"]
+    
+    GENERATOR --> AI["🤖 AI 模型<br/>DeepSeek / OpenAI Compatible"]
+    VALIDATOR --> SCHEMA["📐 JSON Schema<br/>Draft 2020-12"]
+    PROJECT --> DB[("🗄️ SQLite<br/>项目 + 版本表")]
+    
+    PARSER --> WEB
+    GENERATOR --> WEB
+    VALIDATOR --> WEB
+    PROJECT --> WEB
+    EXPORT --> WEB
+    
+    classDef highlight fill:#fef3c7,stroke:#d97706,stroke-width:4px,color:#78350f,font-weight:bold
     classDef main fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e
-    classDef service fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
     classDef data fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
     classDef external fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
-
-    class USER,WEB,API,OUTPUT main
-    class SERVICES service
-    class SCHEMA,DB data
-    class AI external
+    
+    class GENERATOR highlight
+    class USER,WEB,API,PARSER,VALIDATOR,PROJECT,EXPORT main
+    class AI,SCHEMA,DB data
 ```
 
 #### 架构说明
 
-这张图只展示 README 里最需要理解的主链路：前端负责创作交互，FastAPI 负责统一接口，核心服务负责编排章节解析、AI 生成、Schema 校验、项目版本和导出。
+本架构图展示了 Novel2Script 的核心技术组件和数据流向：
 
-更细的模块拆分见 [架构设计](docs/architecture-overview.md) 和 [项目结构说明](docs/project-structure.md)。
+**核心创新**：
+- ⭐ **五阶段 AI 生成引擎**：创新的多阶段生成链路，确保角色一致性和场景连续性
+- 📐 **332 行 Schema 约束**：严格的结构化输出规范，保证剧本质量
+- 💾 **版本快照系统**：类 Git 的版本管理，保护创作成果
 
 **数据流向**：
-1. 用户上传小说 → ChapterParser 识别章节
-2. 触发生成 → ScriptGenerator 调用 AIClient
-3. AIClient 5 阶段调用 DeepSeek API
-4. 返回 YAML → ScriptValidator 校验
-5. 用户编辑 → ProjectService 保存到 SQLite
-6. 导出 → ExportService 多格式转换
+1. 用户上传小说 → 章节解析器识别结构（支持 8+ 种中英文格式）
+2. 触发生成 → 五阶段引擎调用 AI 模型
+3. 每个阶段输出结构化中间结果（可调试、可干预）
+4. Schema 校验器检查输出 → 失败则触发自动修复（最多 3 次）
+5. 用户编辑 → 项目服务保存快照到 SQLite
+6. 导出服务转换为 YAML/JSON/Markdown
+
+详细的模块交互和完整架构见 [架构设计文档](docs/architecture-overview.md)。
 
 ### 项目结构
 
