@@ -38,9 +38,11 @@ export function FileUpload({ onLoaded, onError }: FileUploadProps) {
     <div className="file-upload">
       <input
         ref={inputRef}
-        className="sr-only"
         type="file"
+        hidden
         accept={supportedFormats.join(",")}
+        aria-hidden="true"
+        tabIndex={-1}
         onChange={(event) => {
           const file = event.target.files?.[0];
           if (file) {

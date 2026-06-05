@@ -21,10 +21,10 @@ export function ProjectSidebar({ projects, currentProjectId, loading, onRefresh,
           <h2>本地项目</h2>
         </div>
         <div className="toolbar compact">
-          <button type="button" className="icon-button" onClick={onNew} title="新建项目">
+          <button type="button" className="icon-button" onClick={onNew} title="新建项目" aria-label="新建项目">
             <FilePlus2 className="h-4 w-4" aria-hidden="true" />
           </button>
-          <button type="button" className="icon-button" onClick={onRefresh} disabled={loading} title="刷新项目列表">
+          <button type="button" className="icon-button" onClick={onRefresh} disabled={loading} title="刷新项目列表" aria-label="刷新项目列表">
             {loading ? <span className="spinner" /> : <RefreshCw className="h-4 w-4" aria-hidden="true" />}
           </button>
         </div>
@@ -44,7 +44,13 @@ export function ProjectSidebar({ projects, currentProjectId, loading, onRefresh,
                 <span>{project.genre} · {project.chapter_count} 章</span>
                 <small>{formatDateTime(project.updated_at)}</small>
               </button>
-              <button type="button" className="icon-button danger tiny" onClick={() => onDelete(project.id)} title="删除项目">
+              <button
+                type="button"
+                className="icon-button danger tiny"
+                onClick={() => onDelete(project.id)}
+                title="删除项目"
+                aria-label={`删除项目 ${project.title}`}
+              >
                 <Trash2 className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>

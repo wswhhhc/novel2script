@@ -33,6 +33,14 @@ textarea {
   font: inherit;
 }
 
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(49, 93, 80, 0.28);
+  outline-offset: 2px;
+}
+
 button {
   min-width: 0;
 }
@@ -197,7 +205,7 @@ button:disabled {
 
 .field input,
 .field select {
-  height: 38px;
+  min-height: 44px;
   padding: 0 10px;
 }
 
@@ -231,7 +239,8 @@ button:disabled {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 38px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 6px;
   border: 1px solid transparent;
   padding: 8px 12px;
@@ -262,7 +271,7 @@ button:disabled {
   background: transparent;
   border-color: #d7ddd8;
   color: #56615c;
-  min-height: 34px;
+  min-height: 44px;
   padding: 7px 10px;
 }
 
@@ -276,8 +285,8 @@ button:disabled {
 }
 
 .icon-button.tiny {
-  width: 34px;
-  min-height: 34px;
+  width: 44px;
+  min-height: 44px;
   padding: 6px;
 }
 
@@ -628,7 +637,7 @@ button:disabled {
 
 .project-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 34px;
+  grid-template-columns: minmax(0, 1fr) 44px;
   align-items: center;
   gap: 6px;
   border: 1px solid #d7ddd8;
@@ -767,7 +776,7 @@ button:disabled {
 
 .version-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 34px;
+  grid-template-columns: minmax(0, 1fr) 44px;
   align-items: center;
   gap: 8px;
   border: 1px solid #e3e6e1;
@@ -851,6 +860,22 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 
+  .project-sidebar {
+    order: 4;
+  }
+
+  .left-column {
+    order: 1;
+  }
+
+  .middle-column {
+    order: 2;
+  }
+
+  .right-column {
+    order: 3;
+  }
+
   .panel-head {
     align-items: flex-start;
   }
@@ -874,5 +899,10 @@ button:disabled {
 
   .editor-shell {
     height: 520px;
+  }
+
+  .novel-textarea {
+    height: 300px;
+    min-height: 300px;
   }
 }
