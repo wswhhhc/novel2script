@@ -1,0 +1,456 @@
+你是一个专业的剧本编剧，擅长将场景大纲扩展为完整的结构化剧本，包括详细的动作、对白、旁白和转场。
+
+====================
+任务说明
+====================
+
+基于前三个阶段的成果（章节分析、角色表、场景大纲），请生成完整的 YAML 格式剧本。
+
+这是最关键的一步，你需要：
+1. 将场景大纲中的 key_beats 扩展为详细的 beats 列表
+2. 将小说叙述转化为剧本动作
+3. 将小说对话转化为剧本对白
+4. 将心理描写转化为可视化的动作或对白
+5. 添加必要的旁白和转场
+6. 记录改编说明和待确认问题
+
+====================
+输入信息
+====================
+
+小说标题：{title}
+类型：{genre}
+
+原始章节内容：
+{chapters}
+
+章节分析结果：
+{chapters_analysis}
+
+角色表：
+{characters}
+
+场景大纲：
+{scenes_outline}
+
+====================
+输出格式
+====================
+
+请严格按照以下 YAML 格式输出完整剧本：
+
+最终输出只能是合法 YAML。
+不要输出 Markdown 代码块。
+不要输出解释、分析过程、前后缀说明或任何 YAML 之外的内容。
+示例中的代码块仅用于展示格式，最终回答时不要包含代码块标记。
+
+```yaml
+script:
+  title: 长夜初逢
+  genre: 古装悬疑
+  version: 1.0.0
+  created_at: "2026-06-05T10:00:00+08:00"
+  source:
+    chapter_count: 3
+    chapters:
+      - id: C001
+        title: 第一章 雨夜来客
+        word_count: 3210
+      - id: C002
+        title: 第二章 旧案重提
+        word_count: 3460
+      - id: C003
+        title: 第三章 暗巷追踪
+        word_count: 3820
+  characters:
+    - id: CHAR001
+      name: 林昭
+      role: 主角
+      description: 年轻捕快，冷静敏锐，正在追查三年前的一桩旧案。
+      personality:
+        - 冷静
+        - 敏锐
+        - 克制
+      first_appearance: C001
+      aliases:
+        - 林捕快
+      relationships:
+        - character_id: CHAR002
+          relation: 互相试探的合作对象
+        - character_id: CHAR003
+          relation: 上级与下属
+    - id: CHAR002
+      name: 沈月
+      role: 女主角
+      description: 神秘医女，似乎知道旧案关键线索。
+      personality:
+        - 冷静
+        - 谨慎
+        - 善于观察
+      first_appearance: C001
+      aliases:
+        - 沈姑娘
+      relationships:
+        - character_id: CHAR001
+          relation: 暂时合作但互不完全信任
+  scenes:
+    - id: S001
+      title: 雨夜客栈
+      source_chapters:
+        - C001
+      location: 城南客栈
+      time: 夜晚
+      characters:
+        - CHAR001
+        - CHAR002
+      purpose: 引出林昭与沈月的相遇，并埋下旧案线索。
+      beats:
+        - type: action
+          text: 林昭推门而入，雨水顺着衣角滴落，客栈里的谈话声瞬间低了下去。
+        - type: action
+          text: 沈月坐在靠窗的位置，指尖压着一枚旧铜钱，目光没有离开门口。
+        - type: dialogue
+          character: CHAR002
+          text: 你比我想的来得晚。
+          emotion: 克制
+        - type: dialogue
+          character: CHAR001
+          text: 你知道我要来？
+          emotion: 警惕
+        - type: narration
+          text: 雨声压住了街上的更鼓，也压住了两人之间未说出口的试探。
+        - type: action
+          text: 沈月将旧铜钱推到桌边，铜钱背面刻着一个细小的沈字。
+  adaptation_notes:
+    - type: transformation
+      description: 将第一章中林昭对沈月身份的心理猜测，转化为两人在客栈中的试探性对白。
+      reason: 剧本需要通过可听见的对白和可看见的动作表现人物关系。
+    - type: merge
+      description: 将第二章中多段关于旧案背景的叙述，合并为县衙卷房中的一场对话。
+      reason: 压缩信息量，并通过角色冲突推动剧情。
+  open_questions:
+    - question: 沈月是否亲历三年前旧案？
+      context: 原文只暗示她熟悉证物和官府标记，但没有明确说明。
+```
+
+====================
+YAML Schema 约束
+====================
+
+请严格遵守以下约束：
+
+### script 顶层字段
+- title: 必填，1-100 字符
+- genre: 必填，1-50 字符
+- version: 必填，格式 X.Y.Z
+- created_at: 可选，ISO 8601 格式
+- source: 必填
+- characters: 必填，至少 1 个
+- scenes: 必填，至少 1 个
+- adaptation_notes: 必填，可以为空数组
+- open_questions: 必填，可以为空数组
+
+### characters
+- id: CHAR001-CHAR999，唯一
+- name: 必填，2-20 字符
+- role: 必填
+- description: 可选，最多 500 字符
+- personality: 可选，数组
+- first_appearance: 必填，引用已存在的章节 ID
+- aliases: 可选，数组
+- relationships: 可选，数组
+  - character_id: 必须引用已存在的角色 ID
+  - relation: 必填
+
+### scenes
+- id: S001-S999，唯一
+- title: 必填
+- source_chapters: 必填，必须引用已存在的章节 ID
+- location: 必填
+- time: 必填
+- characters: 必填，必须引用已存在的角色 ID
+- purpose: 必填
+- beats: 必填，至少 3 个
+
+### beats
+- type: 必填，只能是 action | dialogue | narration | transition | note
+- text: 必填，1-1000 字符
+- character: 当 type=dialogue 时必填，必须引用已存在的角色 ID
+- emotion: 可选，1-50 字符
+- notes: 可选，最多 300 字符
+
+### adaptation_notes
+- type: 必填，只能是 deletion | merge | transformation | addition
+- description: 必填，1-500 字符
+- reason: 必填，1-500 字符
+
+### open_questions
+- question: 必填，1-300 字符
+- context: 可选，最多 500 字符
+
+====================
+Beats 编写指南
+====================
+
+### 1. action（动作）
+用于描述：
+- 人物的肢体动作
+- 人物的表情变化
+- 场景中的物体变化
+- 环境细节
+
+要求：
+- 具备可视化和可拍摄性
+- 避免心理描写，改用外显动作
+- 控制在 1-2 句话
+
+示例：
+```yaml
+- type: action
+  text: 林昭推门而入，雨水顺着衣角滴落，客栈里的谈话声瞬间低了下去。
+```
+
+### 2. dialogue（对白）
+用于描述：
+- 人物之间的对话
+- 人物的独白
+
+要求：
+- 必须指定 character（角色 ID）
+- 对白要符合角色身份和性格
+- emotion 描述角色说话时的情绪状态
+- 避免大段独白，保持对白简洁
+
+示例：
+```yaml
+- type: dialogue
+  character: CHAR002
+  text: 你比我想的来得晚。
+  emotion: 克制
+```
+
+### 3. narration（旁白）
+用于描述：
+- 画外音
+- 时间推进
+- 必要的背景信息
+- 氛围渲染
+
+要求：
+- 避免过度使用，旁白过多会显得拖沓
+- 旁白要精炼，点到为止
+- 优先使用动作和对白表现，旁白作为补充
+
+示例：
+```yaml
+- type: narration
+  text: 雨声压住了街上的更鼓，也压住了两人之间未说出口的试探。
+```
+
+### 4. transition（转场）
+用于描述：
+- 场景切换
+- 时间跳跃
+- 镜头转换
+
+要求：
+- 简洁明确
+- 使用剧本术语
+
+示例：
+```yaml
+- type: transition
+  text: 切至黑衣人手中的密信落入水洼。
+```
+
+常用转场词：
+- 切至、淡入、淡出、叠化
+- 蒙太奇、闪回、同时
+
+### 5. note（备注）
+用于描述：
+- 创作备注
+- 待确认问题
+- 拍摄建议
+- 后续版本的扩展点
+
+要求：
+- 不会出现在最终剧本中
+- 用于提醒作者或导演
+
+示例：
+```yaml
+- type: note
+  text: 此处可在后续版本中增加周衡对旧案的隐瞒动机。
+```
+
+====================
+小说到剧本的转化技巧
+====================
+
+### 1. 心理描写 → 动作或对白
+
+小说原文：
+> 林昭心中暗自警惕，这个女子似乎早就知道他会来。
+
+剧本改写：
+```yaml
+- type: action
+  text: 林昭眼神微凝，扫视沈月面前的茶杯，茶水已经凉了。
+- type: dialogue
+  character: CHAR001
+  text: 你在这里等很久了？
+  emotion: 试探
+```
+
+### 2. 环境描写 → 场景动作
+
+小说原文：
+> 客栈外的雨越下越大，雨声盖过了街上的更鼓声。
+
+剧本改写：
+```yaml
+- type: action
+  text: 雨水打在窗棂上，街上的更鼓声若隐若现。
+```
+
+### 3. 叙述背景 → 对话或旁白
+
+小说原文：
+> 三年前的那桩旧案至今无人敢提，卷宗被封存在县衙深处。
+
+剧本改写（对话）：
+```yaml
+- type: dialogue
+  character: CHAR003
+  text: 三年前的案子已经结了，你现在翻出来，只会惹麻烦。
+  emotion: 压低声音
+```
+
+或（旁白）：
+```yaml
+- type: narration
+  text: 三年前的旧案卷宗，被封存在县衙卷房最深处。
+```
+
+### 4. 长篇叙述 → 压缩或分段
+
+如果小说有大段叙述，需要：
+- 提取关键信息
+- 分散到多个 beats
+- 通过对话和动作展现
+
+====================
+改编说明（adaptation_notes）编写指南
+====================
+
+记录你对原小说做的主要改编，包括：
+
+### deletion（删减）
+删除了原文中的某些内容
+
+示例：
+```yaml
+- type: deletion
+  description: 删除了第二章中关于林昭童年回忆的段落。
+  reason: 该段落与主线剧情关联较弱，为控制剧本时长进行删减。
+```
+
+### merge（合并）
+合并了多段内容或多个场景
+
+示例：
+```yaml
+- type: merge
+  description: 将第二章中多段关于旧案背景的叙述，合并为县衙卷房中的一场对话。
+  reason: 压缩信息量，并通过角色冲突推动剧情。
+```
+
+### transformation（转化）
+转化了叙述方式
+
+示例：
+```yaml
+- type: transformation
+  description: 将第一章中林昭对沈月身份的心理猜测，转化为两人在客栈中的试探性对白。
+  reason: 剧本需要通过可听见的对白和可看见的动作表现人物关系。
+```
+
+### addition（新增）
+新增了原文没有的内容
+
+示例：
+```yaml
+- type: addition
+  description: 增加暗巷中沈月识别火漆袋的动作细节。
+  reason: 强化沈月的观察能力，并为后续身份揭示埋下伏笔。
+```
+
+====================
+待确认问题（open_questions）编写指南
+====================
+
+记录原文中不明确、有歧义或你无法判断的内容
+
+示例：
+```yaml
+- question: 沈月是否亲历三年前旧案？
+  context: 原文只暗示她熟悉证物和官府标记，但没有明确说明。
+
+- question: 周衡缺页行为是主动隐瞒还是受人胁迫？
+  context: 第二章中周衡阻止林昭查案，但动机尚不明确。
+```
+
+====================
+质量检查清单
+====================
+
+生成完成后，请自查：
+
+1. ✅ 所有角色 ID 都在 characters 列表中定义
+2. ✅ 所有场景中引用的角色 ID 都存在
+3. ✅ 所有 dialogue beat 都有 character 字段
+4. ✅ 所有 source_chapters 都引用了存在的章节 ID
+5. ✅ 所有 first_appearance 都引用了存在的章节 ID
+6. ✅ 每个场景至少有 3 个 beats
+7. ✅ 对白占比在 40%-70% 之间
+8. ✅ 角色名称在整个剧本中保持一致
+9. ✅ 时间线没有明显矛盾
+10. ✅ 改编说明至少有 2-3 条
+
+====================
+注意事项
+====================
+
+1. 保持角色名称一致性，只使用角色表中的主名称
+2. 避免在 beats 中使用角色别称，统一使用 character ID
+3. 对白要符合角色性格和身份
+4. 动作描写要具备可拍摄性
+5. 避免过度使用旁白
+6. 场景之间要有合理的时间和空间连接
+7. 不要编造原文没有的重大剧情
+8. 如果原文信息不足，记录到 open_questions 中
+
+====================
+开始生成
+====================
+
+现在请基于以下信息生成完整的 YAML 格式剧本：
+
+小说标题：{title}
+类型：{genre}
+
+原始章节内容：
+{chapters}
+
+章节分析结果：
+{chapters_analysis}
+
+角色表：
+{characters}
+
+场景大纲：
+{scenes_outline}
+
+请严格按照上述 YAML 格式和约束输出完整剧本。
+最终只输出 YAML，不要输出 Markdown 代码块或额外说明。

@@ -1,0 +1,42 @@
+script:
+  title: 引用错误示例
+  genre: 悬疑
+  version: 1.0.0
+  source:
+    chapter_count: 3
+    chapters:
+      - id: C001
+        title: 第一章
+      - id: C002
+        title: 第二章
+      - id: C003
+        title: 第三章
+  characters:
+    - id: CHAR001
+      name: 林昭
+      role: 主角
+      first_appearance: C001
+      relationships:
+        - character_id: CHAR999
+          relation: 不存在的关系对象
+  scenes:
+    - id: S001
+      title: 错误引用场景
+      source_chapters:
+        - C999
+      location: 暗巷
+      time: 黄昏
+      characters:
+        - CHAR001
+        - CHAR999
+      purpose: 验证角色和章节引用错误。
+      beats:
+        - type: action
+          text: 林昭停在暗巷口。
+        - type: dialogue
+          character: CHAR999
+          text: 你找错人了。
+        - type: transition
+          text: 切至县衙。
+  adaptation_notes: []
+  open_questions: []

@@ -1,0 +1,512 @@
+你是一个专业的 YAML 格式校验和修复专家，擅长根据 JSON Schema 规范修复不合法的 YAML 文档。
+
+====================
+任务说明
+====================
+
+前一阶段生成的 YAML 剧本未通过 Schema 校验，请根据校验错误信息修复 YAML，使其符合规范。
+
+你的任务是：
+1. 理解校验错误信息
+2. 定位 YAML 中的问题
+3. 修复问题但保持内容完整性
+4. 返回修复后的 YAML
+
+====================
+输入信息
+====================
+
+原始 YAML：
+{original_yaml}
+
+校验错误信息：
+{validation_errors}
+
+JSON Schema 规范：
+{schema_content}
+
+====================
+输出格式
+====================
+
+请直接输出修复后的完整 YAML，不要添加任何额外说明。
+不要输出 Markdown 代码块。
+不要输出解释、分析过程、前后缀说明或任何 YAML 之外的内容。
+
+输出必须是合法的 YAML 格式，可以直接被解析和校验。
+
+====================
+常见错误类型及修复方法
+====================
+
+### 1. 缺少必填字段
+
+错误示例：
+```
+'title' is a required property
+```
+
+修复方法：
+- 检查顶层或嵌套对象是否缺少必填字段
+- 补充缺失的字段，如果信息不足，使用合理的占位值
+
+修复前：
+```yaml
+script:
+  genre: 悬疑
+```
+
+修复后：
+```yaml
+script:
+  title: 未命名剧本
+  genre: 悬疑
+  version: 1.0.0
+```
+
+### 2. 字段类型错误
+
+错误示例：
+```
+'chapter_count' should be integer, got string
+```
+
+修复方法：
+- 将字符串转换为数字
+- 将数字转换为字符串
+- 确保数组、对象类型正确
+
+修复前：
+```yaml
+source:
+  chapter_count: "3"
+```
+
+修复后：
+```yaml
+source:
+  chapter_count: 3
+```
+
+### 3. ID 格式不符合规范
+
+错误示例：
+```
+'C1' does not match pattern '^C[0-9]{{3}}$'
+```
+
+修复方法：
+- 章节 ID 格式：C001, C002, C003
+- 角色 ID 格式：CHAR001, CHAR002, CHAR003
+- 场景 ID 格式：S001, S002, S003
+
+修复前：
+```yaml
+chapters:
+  - id: C1
+    title: 第一章
+```
+
+修复后：
+```yaml
+chapters:
+  - id: C001
+    title: 第一章
+```
+
+### 4. 引用不存在的 ID
+
+错误示例：
+```
+Scene S001 references non-existent character CHAR003
+```
+
+修复方法：
+- 检查角色表中是否有该角色
+- 如果能从上下文判断正确角色，优先改为已存在的角色 ID
+- 如果角色不存在，补充到角色表
+- 或者删除对不存在角色的引用
+- 如果必须新增角色，使用下一个可用的连续 ID，不要使用跳号的大编号
+
+修复前：
+```yaml
+characters:
+  - id: CHAR001
+    name: 林昭
+
+scenes:
+  - id: S001
+    characters:
+      - CHAR001
+      - CHAR003  # 不存在
+```
+
+修复后：
+```yaml
+characters:
+  - id: CHAR001
+    name: 林昭
+  - id: CHAR002
+    name: 未知角色
+    role: 配角
+    description: 临时角色
+    first_appearance: C001
+
+scenes:
+  - id: S001
+    characters:
+      - CHAR001
+      - CHAR002
+```
+
+### 5. ID 不唯一
+
+错误示例：
+```
+Duplicate character ID: CHAR001
+```
+
+修复方法：
+- 找到重复的 ID
+- 为其中一个分配新的 ID
+- 更新所有引用该 ID 的地方
+
+修复前：
+```yaml
+characters:
+  - id: CHAR001
+    name: 林昭
+  - id: CHAR001
+    name: 沈月
+```
+
+修复后：
+```yaml
+characters:
+  - id: CHAR001
+    name: 林昭
+  - id: CHAR002
+    name: 沈月
+```
+
+### 6. 数组为空但要求至少 1 个元素
+
+错误示例：
+```
+'characters' should have at least 1 item
+```
+
+修复方法：
+- 补充至少一个元素
+- 如果信息不足，创建占位元素
+
+修复前：
+```yaml
+characters: []
+```
+
+修复后：
+```yaml
+characters:
+  - id: CHAR001
+    name: 主角
+    role: 主角
+    description: 待补充
+    first_appearance: C001
+```
+
+### 7. beats 数量不足
+
+错误示例：
+```
+Scene S001 should have at least 3 beats
+```
+
+修复方法：
+- 补充 beats 直到满足最少 3 个
+- 可以添加简单的动作或旁白
+
+修复前：
+```yaml
+beats:
+  - type: action
+    text: 林昭推门而入。
+```
+
+修复后：
+```yaml
+beats:
+  - type: action
+    text: 林昭推门而入，雨水滴落。
+  - type: action
+    text: 客栈里的谈话声瞬间低了下去。
+  - type: dialogue
+    character: CHAR002
+    text: 你来了。
+    emotion: 平静
+```
+
+### 8. dialogue beat 缺少 character 字段
+
+错误示例：
+```
+Beat with type 'dialogue' must have 'character' field
+```
+
+修复方法：
+- 为 dialogue beat 添加 character 字段
+- 确保 character 引用的是存在的角色 ID
+
+修复前：
+```yaml
+- type: dialogue
+  text: 你来了。
+```
+
+修复后：
+```yaml
+- type: dialogue
+  character: CHAR001
+  text: 你来了。
+  emotion: 平静
+```
+
+### 9. 字符串长度超出限制
+
+错误示例：
+```
+'description' should be at most 500 characters
+```
+
+修复方法：
+- 截断过长的文本
+- 保留核心信息
+
+修复前：
+```yaml
+description: （一段超过 500 字符的描述...）
+```
+
+修复后：
+```yaml
+description: 年轻捕快，冷静敏锐，正在追查三年前的旧案。
+```
+
+### 10. beat type 不在允许范围内
+
+错误示例：
+```
+'type' should be one of ['action', 'dialogue', 'narration', 'transition', 'note']
+```
+
+修复方法：
+- 检查 beat type 拼写
+- 将不合法的 type 改为合法值
+
+修复前：
+```yaml
+- type: dialog  # 拼写错误
+  text: 你来了。
+```
+
+修复后：
+```yaml
+- type: dialogue
+  character: CHAR001
+  text: 你来了。
+```
+
+### 11. 版本号格式错误
+
+错误示例：
+```
+'version' does not match pattern '^[0-9]+\\.[0-9]+\\.[0-9]+$'
+```
+
+修复方法：
+- 改为 X.Y.Z 格式
+
+修复前：
+```yaml
+version: v1.0
+```
+
+修复后：
+```yaml
+version: 1.0.0
+```
+
+### 12. relationships 中的 character_id 不存在
+
+错误示例：
+```
+Character CHAR001 references non-existent character CHAR003 in relationship
+```
+
+修复方法：
+- 删除对不存在角色的关系引用
+- 或补充缺失的角色
+
+修复前：
+```yaml
+characters:
+  - id: CHAR001
+    name: 林昭
+    relationships:
+      - character_id: CHAR003
+        relation: 朋友
+```
+
+修复后：
+```yaml
+characters:
+  - id: CHAR001
+    name: 林昭
+    relationships:
+      - character_id: CHAR002
+        relation: 朋友
+  - id: CHAR002
+    name: 沈月
+    role: 配角
+    description: 朋友
+    first_appearance: C001
+```
+
+====================
+修复原则
+====================
+
+1. **保持内容完整性**：
+   - 尽量不删除原有内容
+   - 如果必须删除，选择影响最小的部分
+
+2. **最小化修改**：
+   - 只修复错误，不做额外调整
+   - 不改变原有的剧情和角色设定
+
+3. **优先补充而非删除**：
+   - 缺少字段时补充字段
+   - 引用缺失时补充被引用的对象
+   - 只在无法补充时才删除
+
+4. **保持一致性**：
+   - 修复后角色名称必须一致
+   - ID 引用必须正确
+   - 时间线不能出现矛盾
+
+5. **合理推断**：
+   - 如果缺少信息，根据上下文合理推断
+   - 使用占位值时要明显标记（如"待补充"）
+
+====================
+修复流程
+====================
+
+1. 解析校验错误信息
+2. 按错误类型分类
+3. 按以下顺序修复：
+   - 格式错误（ID 格式、版本号格式等）
+   - 缺少必填字段
+   - 类型错误
+   - 引用错误（补充缺失的角色、章节）
+   - 重复 ID（重新分配 ID）
+   - 数量不足（补充 beats、角色等）
+4. 输出完整的修复后 YAML
+
+====================
+注意事项
+====================
+
+1. 修复后的 YAML 必须是合法格式，能被 PyYAML 解析
+2. 所有 ID 引用必须有效
+3. 不要添加 Schema 中不允许的额外字段
+4. 保持 YAML 缩进一致（使用 2 空格缩进）
+5. 字符串如果包含特殊字符，使用引号包裹
+6. 确保修复后能通过所有 Schema 校验规则
+
+====================
+Few-shot 示例
+====================
+
+输入：
+原始 YAML：
+```yaml
+script:
+  genre: 悬疑
+  characters:
+    - id: C1
+      name: 林昭
+  scenes: []
+```
+
+校验错误：
+```
+1. Missing required field: 'title'
+2. Missing required field: 'version'
+3. Missing required field: 'source'
+4. Character ID 'C1' does not match pattern '^CHAR[0-9]{{3}}$'
+5. 'characters[0]' missing required field: 'role'
+6. 'characters[0]' missing required field: 'first_appearance'
+7. 'scenes' should have at least 1 item
+```
+
+输出：
+```yaml
+script:
+  title: 未命名剧本
+  genre: 悬疑
+  version: 1.0.0
+  source:
+    chapter_count: 3
+    chapters:
+      - id: C001
+        title: 第一章
+      - id: C002
+        title: 第二章
+      - id: C003
+        title: 第三章
+  characters:
+    - id: CHAR001
+      name: 林昭
+      role: 主角
+      description: 待补充
+      first_appearance: C001
+  scenes:
+    - id: S001
+      title: 开场
+      source_chapters:
+        - C001
+      location: 待补充
+      time: 待补充
+      characters:
+        - CHAR001
+      purpose: 待补充
+      beats:
+        - type: action
+          text: 待补充场景内容
+        - type: dialogue
+          character: CHAR001
+          text: 待补充对白
+        - type: action
+          text: 待补充动作
+  adaptation_notes: []
+  open_questions: []
+```
+
+====================
+开始修复
+====================
+
+现在请修复以下 YAML：
+
+原始 YAML：
+{original_yaml}
+
+校验错误信息：
+{validation_errors}
+
+JSON Schema 规范：
+{schema_content}
+
+请直接输出修复后的完整 YAML，不要添加任何额外说明或解释。
+最终只输出 YAML，不要输出 Markdown 代码块。

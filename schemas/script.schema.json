@@ -1,0 +1,332 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel2script.local/schemas/script.schema.json",
+  "title": "Novel2Script YAML Script Schema",
+  "description": "Schema for validating AI-generated structured screenplay YAML after parsing it into JSON.",
+  "type": "object",
+  "required": ["script"],
+  "additionalProperties": false,
+  "properties": {
+    "script": {
+      "type": "object",
+      "required": [
+        "title",
+        "genre",
+        "version",
+        "source",
+        "characters",
+        "scenes",
+        "adaptation_notes",
+        "open_questions"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "genre": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "characters": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/character"
+          }
+        },
+        "scenes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/scene"
+          }
+        },
+        "adaptation_notes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/adaptationNote"
+          }
+        },
+        "open_questions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/openQuestion"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "chapterId": {
+      "type": "string",
+      "pattern": "^C[0-9]{3}$"
+    },
+    "characterId": {
+      "type": "string",
+      "pattern": "^CHAR[0-9]{3}$"
+    },
+    "sceneId": {
+      "type": "string",
+      "pattern": "^S[0-9]{3}$"
+    },
+    "source": {
+      "type": "object",
+      "required": ["chapter_count", "chapters"],
+      "additionalProperties": false,
+      "properties": {
+        "chapter_count": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 20
+        },
+        "chapters": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/chapter"
+          }
+        }
+      }
+    },
+    "chapter": {
+      "type": "object",
+      "required": ["id", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/chapterId"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "word_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        }
+      }
+    },
+    "character": {
+      "type": "object",
+      "required": ["id", "name", "role", "first_appearance"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/characterId"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 30
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "personality": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          }
+        },
+        "first_appearance": {
+          "$ref": "#/$defs/chapterId"
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          }
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/relationship"
+          }
+        }
+      }
+    },
+    "relationship": {
+      "type": "object",
+      "required": ["character_id", "relation"],
+      "additionalProperties": false,
+      "properties": {
+        "character_id": {
+          "$ref": "#/$defs/characterId"
+        },
+        "relation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      }
+    },
+    "scene": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "source_chapters",
+        "location",
+        "time",
+        "characters",
+        "purpose",
+        "beats"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/sceneId"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "source_chapters": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/chapterId"
+          }
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "time": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "characters": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/characterId"
+          }
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "beats": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "$ref": "#/$defs/beat"
+          }
+        }
+      }
+    },
+    "beat": {
+      "type": "object",
+      "required": ["type", "text"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["action", "dialogue", "narration", "transition", "note"]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "character": {
+          "$ref": "#/$defs/characterId"
+        },
+        "emotion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 300
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "dialogue"
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["character"]
+          }
+        }
+      ]
+    },
+    "adaptationNote": {
+      "type": "object",
+      "required": ["type", "description", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["deletion", "merge", "transformation", "addition"]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      }
+    },
+    "openQuestion": {
+      "type": "object",
+      "required": ["question"],
+      "additionalProperties": false,
+      "properties": {
+        "question": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "context": {
+          "type": "string",
+          "maxLength": 500
+        }
+      }
+    }
+  }
+}

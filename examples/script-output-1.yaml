@@ -1,0 +1,157 @@
+script:
+  title: 长夜初逢
+  genre: 古装悬疑
+  version: 1.0.0
+  created_at: "2026-06-05T10:00:00+08:00"
+  source:
+    chapter_count: 3
+    chapters:
+      - id: C001
+        title: 第一章 雨夜来客
+        word_count: 3210
+      - id: C002
+        title: 第二章 旧案重提
+        word_count: 3460
+      - id: C003
+        title: 第三章 暗巷追踪
+        word_count: 3820
+  characters:
+    - id: CHAR001
+      name: 林昭
+      role: 主角
+      description: 年轻捕快，冷静敏锐，正在追查三年前的一桩旧案。
+      personality:
+        - 冷静
+        - 敏锐
+        - 克制
+      first_appearance: C001
+      aliases:
+        - 林捕快
+      relationships:
+        - character_id: CHAR002
+          relation: 互相试探的合作对象
+        - character_id: CHAR003
+          relation: 上级与下属
+    - id: CHAR002
+      name: 沈月
+      role: 女主角
+      description: 神秘医女，似乎知道旧案关键线索。
+      personality:
+        - 冷静
+        - 谨慎
+        - 善于观察
+      first_appearance: C001
+      aliases:
+        - 沈姑娘
+      relationships:
+        - character_id: CHAR001
+          relation: 暂时合作但互不完全信任
+    - id: CHAR003
+      name: 周衡
+      role: 配角
+      description: 县衙捕头，负责旧案卷宗保管。
+      personality:
+        - 稳重
+        - 多疑
+      first_appearance: C002
+      relationships:
+        - character_id: CHAR001
+          relation: 上级与下属
+  scenes:
+    - id: S001
+      title: 雨夜客栈
+      source_chapters:
+        - C001
+      location: 城南客栈
+      time: 夜晚
+      characters:
+        - CHAR001
+        - CHAR002
+      purpose: 引出林昭与沈月的相遇，并埋下旧案线索。
+      beats:
+        - type: action
+          text: 林昭推门而入，雨水顺着衣角滴落，客栈里的谈话声瞬间低了下去。
+        - type: action
+          text: 沈月坐在靠窗的位置，指尖压着一枚旧铜钱，目光没有离开门口。
+        - type: dialogue
+          character: CHAR002
+          text: 你比我想的来得晚。
+          emotion: 克制
+        - type: dialogue
+          character: CHAR001
+          text: 你知道我要来？
+          emotion: 警惕
+        - type: narration
+          text: 雨声压住了街上的更鼓，也压住了两人之间未说出口的试探。
+        - type: action
+          text: 沈月将旧铜钱推到桌边，铜钱背面刻着一个细小的沈字。
+    - id: S002
+      title: 县衙旧卷
+      source_chapters:
+        - C002
+      location: 县衙卷房
+      time: 次日上午
+      characters:
+        - CHAR001
+        - CHAR003
+      purpose: 展示旧案背景，并让林昭发现卷宗缺页。
+      beats:
+        - type: action
+          text: 周衡打开卷房木门，灰尘在日光里浮动，架上的旧卷按年份排列。
+        - type: dialogue
+          character: CHAR003
+          text: 三年前的案子已经结了，你现在翻出来，只会惹麻烦。
+          emotion: 压低声音
+        - type: dialogue
+          character: CHAR001
+          text: 如果真的结了，就不会有人在昨夜把证物送到我面前。
+          emotion: 冷静
+        - type: action
+          text: 林昭抽出旧案卷宗，翻到证人供词一页时，发现中间少了两张纸。
+        - type: note
+          text: 此处可在后续版本中增加周衡对旧案的隐瞒动机。
+    - id: S003
+      title: 暗巷追踪
+      source_chapters:
+        - C003
+      location: 城西暗巷
+      time: 黄昏
+      characters:
+        - CHAR001
+        - CHAR002
+      purpose: 推进调查线索，让林昭和沈月形成暂时合作。
+      beats:
+        - type: action
+          text: 暗巷尽头传来急促脚步声，林昭贴墙停下，抬手示意沈月噤声。
+        - type: dialogue
+          character: CHAR002
+          text: 他不是普通送信人，腰间有官府的火漆袋。
+          emotion: 低声
+        - type: dialogue
+          character: CHAR001
+          text: 你连这个都认得？
+          emotion: 试探
+        - type: action
+          text: 沈月没有回答，只在黑衣人转身的一瞬间掷出银针。
+        - type: transition
+          text: 切至黑衣人手中的密信落入水洼。
+        - type: action
+          text: 林昭拾起密信，火漆上的纹样与旧案卷宗封面完全一致。
+  adaptation_notes:
+    - type: transformation
+      description: 将第一章中林昭对沈月身份的心理猜测，转化为两人在客栈中的试探性对白。
+      reason: 剧本需要通过可听见的对白和可看见的动作表现人物关系。
+    - type: merge
+      description: 将第二章中多段关于旧案背景的叙述，合并为县衙卷房中的一场对话。
+      reason: 压缩信息量，并通过角色冲突推动剧情。
+    - type: deletion
+      description: 删除第一章中连续三段关于雨夜街景的重复描写，只保留客栈开场所需的环境信息。
+      reason: 剧本初稿需要控制节奏，避免环境描写过长影响场景推进。
+    - type: addition
+      description: 增加暗巷中沈月识别火漆袋的动作细节。
+      reason: 强化沈月的观察能力，并为后续身份揭示埋下伏笔。
+  open_questions:
+    - question: 沈月是否亲历三年前旧案？
+      context: 原文只暗示她熟悉证物和官府标记，但没有明确说明。
+    - question: 周衡缺页行为是主动隐瞒还是受人胁迫？
+      context: 第二章中周衡阻止林昭查案，但动机尚不明确。

@@ -1,0 +1,37 @@
+script:
+  title: 缺少类型字段的剧本
+  version: 1.0.0
+  source:
+    chapter_count: 3
+    chapters:
+      - id: C001
+        title: 第一章
+      - id: C002
+        title: 第二章
+      - id: C003
+        title: 第三章
+  characters:
+    - id: CHAR001
+      name: 林昭
+      role: 主角
+      first_appearance: C001
+  scenes:
+    - id: S001
+      title: 开场
+      source_chapters:
+        - C001
+      location: 客栈
+      time: 夜晚
+      characters:
+        - CHAR001
+      purpose: 引出主角。
+      beats:
+        - type: action
+          text: 林昭推门而入。
+        - type: dialogue
+          character: CHAR001
+          text: 我来晚了。
+        - type: transition
+          text: 切至雨夜长街。
+  adaptation_notes: []
+  open_questions: []

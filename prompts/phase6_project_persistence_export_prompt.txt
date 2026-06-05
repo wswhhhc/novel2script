@@ -1,0 +1,799 @@
+你是一个资深全栈工程师，擅长产品化 MVP、数据建模、导出系统和前后端集成。请基于当前已经完成的 Novel2Script 项目，完成第六阶段任务：项目持久化与多格式导出。
+
+====================
+重要说明
+====================
+
+【阶段定位】第六阶段是 MVP 的增强扩展，不在原需求文档的 MVP 核心范围内。
+
+原需求文档（docs/requirements.md）明确指出以下功能”暂不实现”：
+- 用户登录和权限管理
+- 多人协作编辑
+- 在线版本管理
+
+但基于以下原因，建议实现轻量级项目持久化功能：
+
+1. **用户体验**：无保存功能的工具实用性严重不足，用户无法保留工作成果
+2. **产品完整度**：项目保存是创作工具的基础能力
+3. **技术可行性**：SQLite 本地存储，无需登录、云同步等复杂基础设施
+4. **范围可控**：仅实现本地持久化，不涉及多人协作和云服务
+
+【实施建议】
+- 如果项目时间紧张或需要严格遵守原 MVP 定义，可以跳过本阶段
+- 如果决定实施本阶段，请先更新 docs/requirements.md，将”项目本地保存和导出”从”暂不实现”移至”MVP 扩展功能”
+- 可以选择实施完整版或简化版（见下文”实施方案选项”）
+
+====================
+任务背景
+====================
+
+项目名称：Novel2Script：AI 小说转剧本创作助手
+
+项目目标：
+开发一款 AI 辅助剧本创作工具，支持用户输入 3 个章节以上的小说文本，自动生成符合 YAML Schema 的结构化剧本初稿，并允许用户继续编辑、校验、保存和导出。
+
+当前已经完成：
+
+- 第一阶段：需求、Schema、Prompt 模板和标准 YAML 示例
+- 第二阶段：FastAPI 后端核心接口
+- 第三阶段：React 前端工作台
+- 第四阶段：测试优化、示例数据和验收文档
+- 第五阶段：真实 AI 生成链路接入与稳定化
+
+第六阶段目标是让工具从”一次性生成器”升级为”可保存、可回看、可导出”的轻量创作工作台。
+
+====================
+实施方案选项
+====================
+
+请根据项目实际情况选择实施方案。
+
+## 方案 A：简化版（推荐用于时间紧张或演示项目）
+
+核心功能：
+1. ✅ 保存当前项目（title、genre、source_content、yaml）
+2. ✅ 项目列表
+3. ✅ 打开历史项目
+4. ✅ 更新项目
+5. ✅ 删除项目
+6. ✅ 导出 YAML / JSON / Markdown
+7. ❌ 不实现版本历史
+8. ❌ 不实现版本恢复
+
+优点：
+- 开发周期短（2-3 天）
+- 技术复杂度低
+- 用户体验显著提升
+- 不涉及”版本管理”争议
+
+数据模型：
+- 仅需 Project 表
+- 不需要 ScriptVersion 表
+
+## 方案 B：完整版（推荐用于实际产品）
+
+核心功能：
+1. ✅ 保存当前项目
+2. ✅ 项目列表
+3. ✅ 打开历史项目
+4. ✅ 更新项目
+5. ✅ 删除项目
+6. ✅ 保存 YAML 版本快照
+7. ✅ 查看版本历史
+8. ✅ 恢复指定版本
+9. ✅ 导出 YAML / JSON / Markdown
+
+优点：
+- 产品完整度高
+- 用户体验优秀
+- 支持迭代式创作流程
+- 版本对比和回滚能力
+
+缺点：
+- 开发周期较长（4-5 天）
+- 数据模型较复杂
+- 需要实现版本管理 UI
+
+数据模型：
+- Project 表
+- ScriptVersion 表
+
+## 如何选择
+
+- **比赛项目、演示 MVP**：选择方案 A 或跳过第六阶段
+- **实际产品、长期运营**：选择方案 B
+- **不确定**：先实施方案 A，后续可升级为方案 B
+
+====================
+第六阶段目标（方案 B 完整版）
+====================
+
+如果选择方案 B，请实现以下完整功能：
+
+1. 用户可以保存当前小说输入、章节解析结果、YAML 剧本和校验结果
+2. 用户可以查看已保存项目列表
+3. 用户可以打开历史项目继续编辑 YAML
+4. 用户可以保存 YAML 的多个版本快照
+5. 用户可以查看版本历史并恢复某个版本
+6. 用户可以导出 YAML、JSON、Markdown 三种格式
+7. 保持无需登录、无需复杂权限系统
+8. 保持 Mock / AI 生成模式均可用
+
+本阶段仍不实现多人协作、云同步、支付、复杂权限或完整剧本文档排版系统。
+
+====================
+必须阅读的文件
+====================
+
+开发前请先阅读：
+
+1. docs/requirements.md
+2. docs/yaml-schema.md
+3. docs/testing-report.md
+4. docs/ai-generation.md
+5. README.md
+6. backend/README.md
+7. frontend/README.md
+8. backend/app/main.py
+9. backend/app/routers/script.py
+10. backend/app/schemas/requests.py
+11. backend/app/schemas/responses.py
+12. backend/app/services/script_validator.py
+13. backend/app/services/script_generator.py
+14. frontend/src/App.tsx
+15. frontend/src/api/client.ts
+16. frontend/src/api/types.ts
+17. frontend/src/components/YamlEditor.tsx
+18. frontend/src/components/ChapterList.tsx
+19. schemas/script.schema.json
+20. examples/script-output-1.yaml
+
+请优先理解现有前后端结构，不要重写项目。
+
+====================
+推荐技术方案
+====================
+
+后端：
+
+- FastAPI
+- SQLite
+- SQLModel 或 SQLAlchemy
+- Pydantic
+- PyYAML
+- jsonschema
+- pytest
+
+前端：
+
+- React
+- TypeScript
+- Tailwind CSS
+- Monaco Editor
+- 现有组件体系
+
+如果当前项目尚未引入数据库，本阶段建议使用 SQLite 本地文件：
+
+```text
+backend/data/novel2script.db
+```
+
+不需要 PostgreSQL、Redis、对象存储或登录系统。
+
+====================
+推荐新增目录结构
+====================
+
+可以根据实际情况新增：
+
+backend/app/
+  db/
+    __init__.py
+    database.py
+    models.py
+  routers/
+    projects.py
+    exports.py
+  services/
+    project_service.py
+    export_service.py
+
+backend/tests/
+  test_projects_api.py
+  test_export_service.py
+  test_versions_api.py
+
+frontend/src/
+  components/
+    ProjectSidebar.tsx
+    ProjectList.tsx
+    SaveProjectDialog.tsx
+    VersionHistory.tsx
+    ExportPanel.tsx
+  utils/
+    format.ts
+
+docs/
+  phase6-projects-export.md
+  phase6-test-report.md
+
+如果现有文件更适合承载相关逻辑，可以小幅调整。组件职责必须清晰。
+
+====================
+数据模型要求
+====================
+
+请根据选择的方案设计数据模型。
+
+## 方案 A：简化版数据模型
+
+### Project 表
+
+表示一个小说转剧本项目。
+
+建议字段：
+
+- id: string 或 int (主键)
+- title: string (必填)
+- genre: string (必填)
+- source_content: text (必填，原始小说文本)
+- chapter_count: int
+- chapters_json: text (JSON 字符串，存储章节列表)
+- current_yaml: text (当前 YAML 剧本)
+- validation_json: text (JSON 字符串，存储校验结果)
+- generation_mode: string (mock / ai)
+- created_at: datetime
+- updated_at: datetime
+
+要求：
+- 每次保存项目时更新 current_yaml 和 updated_at
+- 不保留历史版本，只保留最新状态
+- 删除项目即删除该记录
+
+## 方案 B：完整版数据模型
+
+### Project 表
+
+表示一个小说转剧本项目。
+
+建议字段：
+
+- id: string 或 int (主键)
+- title: string (必填)
+- genre: string (必填)
+- source_content: text (必填，原始小说文本)
+- chapter_count: int
+- chapters_json: text (JSON 字符串，存储章节列表)
+- current_yaml: text (当前 YAML 剧本)
+- validation_json: text (JSON 字符串，存储校验结果)
+- generation_mode: string (mock / ai)
+- created_at: datetime
+- updated_at: datetime
+
+### ScriptVersion 表
+
+表示某个项目的一次 YAML 版本快照。
+
+建议字段：
+
+- id: string 或 int (主键)
+- project_id: 外键 → Project.id
+- version_name: string (必填，如 "初稿 v1")
+- yaml: text (必填，版本快照的 YAML 内容)
+- validation_json: text (JSON 字符串，存储该版本的校验结果)
+- note: text (可选，版本说明)
+- created_at: datetime
+
+关系：
+- 一个 Project 可以有多个 ScriptVersion
+- 删除 Project 时级联删除其所有 ScriptVersion
+
+要求：
+- 保存项目时更新 Project.current_yaml
+- 用户手动保存版本时创建新的 ScriptVersion 记录
+- 恢复版本时将 ScriptVersion.yaml 复制到 Project.current_yaml
+
+====================
+后端接口要求
+====================
+
+请根据选择的方案实现相应接口。
+
+## 方案 A：简化版接口（5 个项目管理接口 + 3 个导出接口）
+
+### 项目管理接口
+
+#### 1. 创建项目
+
+POST /api/projects
+
+请求：
+
+```json
+{
+  "title": "长夜初逢",
+  "genre": "悬疑",
+  "source_content": "小说全文",
+  "chapters": [],
+  "yaml": "script:\n  title: ...",
+  "validation": {
+    "valid": true,
+    "errors": []
+  },
+  "generation_mode": "mock"
+}
+```
+
+响应：
+
+```json
+{
+  "id": 1,
+  "title": "长夜初逢",
+  "genre": "悬疑",
+  "chapter_count": 3,
+  "generation_mode": "mock",
+  "created_at": "2026-06-05T10:00:00Z",
+  "updated_at": "2026-06-05T10:00:00Z"
+}
+```
+
+#### 2. 项目列表
+
+GET /api/projects
+
+响应：
+
+```json
+[
+  {
+    "id": 1,
+    "title": "长夜初逢",
+    "genre": "悬疑",
+    "chapter_count": 3,
+    "generation_mode": "mock",
+    "created_at": "2026-06-05T10:00:00Z",
+    "updated_at": "2026-06-05T10:00:00Z"
+  }
+]
+```
+
+#### 3. 项目详情
+
+GET /api/projects/{project_id}
+
+响应应包含：
+- 项目基础信息
+- source_content
+- chapters
+- current_yaml
+- validation
+
+#### 4. 更新项目
+
+PUT /api/projects/{project_id}
+
+请求：
+
+```json
+{
+  "title": "长夜初逢（修改版）",
+  "genre": "悬疑",
+  "yaml": "script:\n  title: ...",
+  "validation": {
+    "valid": true,
+    "errors": []
+  }
+}
+```
+
+用途：
+- 更新 title / genre
+- 更新 current_yaml
+- 更新 validation
+- 可选更新 source_content 和 chapters
+
+#### 5. 删除项目
+
+DELETE /api/projects/{project_id}
+
+响应：
+
+```json
+{
+  "message": "项目已删除",
+  "id": 1
+}
+```
+
+### 导出接口
+
+#### 6. 导出 YAML
+
+GET /api/projects/{project_id}/export/yaml
+
+返回：
+- Content-Type: application/x-yaml 或 text/yaml
+- Content-Disposition: attachment; filename="{title}_script.yaml"
+- 内容为 current_yaml
+
+#### 7. 导出 JSON
+
+GET /api/projects/{project_id}/export/json
+
+要求：
+- 将 YAML 解析为 JSON
+- 返回 Content-Type: application/json
+- Content-Disposition: attachment; filename="{title}_script.json"
+- 如果 YAML 当前不合法，应返回 400 错误和明确提示
+
+#### 8. 导出 Markdown
+
+GET /api/projects/{project_id}/export/markdown
+
+要求：
+- 将 YAML 剧本转换为可读 Markdown
+- Content-Type: text/markdown
+- Content-Disposition: attachment; filename="{title}_script.md"
+- 至少包含：标题、类型、来源章节、角色表、场景列表、改编说明
+
+## 方案 B：完整版接口（8 个项目管理接口 + 3 个导出接口）
+
+### 项目管理接口（1-5 与方案 A 相同）
+
+#### 1-5. 同方案 A
+
+（创建项目、项目列表、项目详情、更新项目、删除项目）
+
+### 版本管理接口
+
+#### 6. 创建版本快照
+
+POST /api/projects/{project_id}/versions
+
+请求：
+
+```json
+{
+  "version_name": "初稿 v1",
+  "yaml": "script:\n  title: ...",
+  "validation": {
+    "valid": true,
+    "errors": []
+  },
+  "note": "AI 生成后人工微调"
+}
+```
+
+响应：
+
+```json
+{
+  "id": 1,
+  "project_id": 1,
+  "version_name": "初稿 v1",
+  "note": "AI 生成后人工微调",
+  "created_at": "2026-06-05T10:00:00Z"
+}
+```
+
+#### 7. 版本列表
+
+GET /api/projects/{project_id}/versions
+
+响应：
+
+```json
+[
+  {
+    "id": 1,
+    "version_name": "初稿 v1",
+    "note": "AI 生成后人工微调",
+    "created_at": "2026-06-05T10:00:00Z"
+  },
+  {
+    "id": 2,
+    "version_name": "初稿 v2",
+    "note": "优化对白",
+    "created_at": "2026-06-05T11:00:00Z"
+  }
+]
+```
+
+#### 8. 版本详情
+
+GET /api/projects/{project_id}/versions/{version_id}
+
+响应应包含：
+- 版本基础信息
+- yaml 完整内容
+- validation
+
+#### 9. 恢复版本
+
+POST /api/projects/{project_id}/versions/{version_id}/restore
+
+要求：
+- 将版本 YAML 复制到项目 current_yaml
+- 同步恢复该版本 validation
+- 不删除版本记录
+- 返回更新后的项目详情
+
+响应：
+
+```json
+{
+  "id": 1,
+  "title": "长夜初逢",
+  "current_yaml": "...",
+  "validation": {...},
+  "updated_at": "2026-06-05T12:00:00Z",
+  "restored_from_version": 1
+}
+```
+
+### 导出接口（10-12 与方案 A 相同）
+
+#### 10-12. 同方案 A
+
+（导出 YAML、导出 JSON、导出 Markdown）
+
+====================
+前端功能要求
+====================
+
+请根据选择的方案实现相应功能。
+
+## 方案 A：简化版前端功能
+
+必须实现：
+
+1. **保存项目按钮**
+   - 首次保存：弹出对话框输入 title 和 genre
+   - 再次保存：直接更新现有项目
+   - 保存成功后显示提示
+
+2. **项目列表入口**
+   - 顶部菜单或侧边栏
+   - 显示项目列表（title、genre、更新时间）
+   - 点击项目打开
+
+3. **打开项目后恢复**
+   - title
+   - genre
+   - source_content
+   - chapters
+   - yaml
+   - validation
+   - 显示"当前项目：{title}"
+
+4. **项目状态提示**
+   - 显示当前项目名称
+   - 显示是否有未保存修改
+   - 提供"保存"和"另存为"按钮
+
+5. **导出操作**
+   - 导出 YAML 按钮
+   - 导出 JSON 按钮
+   - 导出 Markdown 按钮
+   - 下载文件名格式：{title}_script.{ext}
+
+6. **删除项目**
+   - 项目列表中提供删除按钮
+   - 删除前弹出确认对话框
+
+7. **错误处理**
+   - 请求失败时显示错误且不清空当前编辑内容
+   - 网络错误友好提示
+
+不实现：
+- ❌ 版本历史面板
+- ❌ 保存版本快照
+- ❌ 恢复版本功能
+
+## 方案 B：完整版前端功能
+
+必须实现（在方案 A 基础上增加）：
+
+8. **保存版本快照按钮**
+   - 在 YAML 编辑器区域
+   - 点击后弹出对话框输入 version_name 和 note
+   - 保存成功后提示
+
+9. **版本历史面板**
+   - 显示版本列表（version_name、note、创建时间）
+   - 可折叠/展开
+   - 每个版本显示预览按钮
+
+10. **恢复版本功能**
+    - 版本列表中每个版本有"恢复"按钮
+    - 恢复前弹出确认对话框
+    - 恢复后更新 YAML 编辑器内容
+    - 提示"已恢复到版本：{version_name}"
+
+11. **版本对比（可选）**
+    - 显示当前版本和历史版本的差异
+    - 使用 diff 视图
+
+## 通用布局建议
+
+- **桌面端**：
+  - 左侧：项目列表或折叠侧边栏（200-250px）
+  - 中间：章节识别和生成状态（保持现有）
+  - 右侧：YAML 编辑器和校验结果（保持现有）
+  - 顶部：项目名称、保存状态、导出按钮
+
+- **移动端**：
+  - 项目列表作为抽屉式面板
+  - 单列布局
+  - 固定顶部导航栏
+
+## 视觉要求
+
+- 保持第三阶段的克制工具风格 ✅
+- 不要做大卡片堆叠 ❌
+- 不要使用营销式 Hero ❌
+- 避免文字溢出按钮或容器 ✅
+- 项目列表使用简洁列表或网格 ✅
+- 版本历史使用时间线或简单列表 ✅
+
+====================
+前端 API 封装要求
+====================
+
+请在 frontend/src/api/client.ts 和 types.ts 中补充：
+
+- listProjects()
+- createProject(payload)
+- getProject(id)
+- updateProject(id, payload)
+- deleteProject(id)
+- createVersion(projectId, payload)
+- listVersions(projectId)
+- restoreVersion(projectId, versionId)
+- exportProject(projectId, format)
+
+要求：
+
+- 统一使用 VITE_API_BASE_URL。
+- 统一错误处理。
+- 下载类接口应正确处理 Blob。
+
+====================
+校验与安全要求
+====================
+
+后端保存项目前必须：
+
+1. 校验 title 不为空。
+2. 校验 YAML 不为空。
+3. 对 YAML 调用 validate_script_yaml。
+4. 允许保存 invalid YAML，但必须保存 validation errors。
+5. 导出 JSON 和 Markdown 时，如果 YAML 无法解析，应返回明确错误。
+
+安全要求：
+
+- 不需要登录。
+- 但接口不能执行任意文件路径读取。
+- 导出文件名需要清理非法字符。
+- 不要把数据库文件提交到版本控制说明中。
+
+====================
+测试要求
+====================
+
+后端测试至少覆盖：
+
+1. 创建项目成功。
+2. 项目列表返回已创建项目。
+3. 项目详情包含 YAML 和 chapters。
+4. 更新项目成功。
+5. 删除项目后无法获取详情。
+6. 创建版本成功。
+7. 版本列表返回版本。
+8. 恢复版本后 current_yaml 更新。
+9. 导出 YAML 返回原始 YAML。
+10. 导出 JSON 返回可解析 JSON。
+11. 导出 Markdown 包含标题、角色和场景。
+12. 无效项目 ID 返回 404。
+13. 无效 YAML 导出 JSON 时返回明确错误。
+14. 现有后端测试仍然通过。
+
+前端测试或 smoke 至少覆盖：
+
+1. 保存项目按钮或入口存在。
+2. 项目列表入口存在。
+3. 版本历史入口存在。
+4. 导出 YAML / JSON / Markdown 入口存在。
+5. 原有生成、校验、复制、下载流程不被破坏。
+
+====================
+文档要求
+====================
+
+请新增或更新：
+
+1. README.md
+2. backend/README.md
+3. frontend/README.md
+4. docs/phase6-projects-export.md
+5. docs/phase6-test-report.md
+
+文档至少说明：
+
+1. SQLite 数据文件位置。
+2. 如何初始化数据库。
+3. 如何启动后端和前端。
+4. 如何保存项目。
+5. 如何保存版本和恢复版本。
+6. 如何导出 YAML / JSON / Markdown。
+7. 如何运行测试。
+8. 当前限制：
+   - 无登录，所有项目为本地实例共享。
+   - 无云同步。
+   - Markdown 为基础排版，不是最终出版格式。
+
+====================
+验收标准
+====================
+
+完成后应满足：
+
+1. 后端项目管理接口可用。
+2. 后端版本历史接口可用。
+3. 后端三种导出接口可用。
+4. 前端可以保存当前工作台内容。
+5. 前端可以打开历史项目。
+6. 前端可以保存和恢复 YAML 版本。
+7. 前端可以导出 YAML / JSON / Markdown。
+8. Mock 模式和 AI 模式生成流程不被破坏。
+9. 现有章节识别、YAML 编辑、重新校验、复制、下载仍可用。
+10. 后端测试通过。
+11. 前端构建或 smoke test 通过。
+12. 文档完整说明使用方式。
+
+====================
+实现约束
+====================
+
+- 不要实现登录。
+- 不要实现多人协作。
+- 不要引入远程数据库。
+- 不要实现云同步。
+- 不要实现复杂权限。
+- 不要实现 Word / PDF 导出，本阶段只做 YAML / JSON / Markdown。
+- 不要删除 Mock 模式。
+- 不要破坏 AI 模式。
+- 不要对前端做大规模视觉重设计。
+- 不要把 SQLite 数据库文件、用户生成内容或 API Key 写入代码。
+
+====================
+建议执行顺序
+====================
+
+1. 阅读当前后端、前端、测试和文档。
+2. 设计 SQLite 数据模型和初始化逻辑。
+3. 实现 Project / ScriptVersion 后端服务。
+4. 实现项目管理 API。
+5. 实现导出服务和导出 API。
+6. 编写后端测试。
+7. 扩展前端 API 类型和客户端。
+8. 在工作台加入项目保存、列表、版本和导出入口。
+9. 编写前端 smoke test。
+10. 更新 README 和阶段文档。
+11. 运行后端测试、前端 smoke/build。
+
+====================
+最终交付
+====================
+
+请直接完成第六阶段实现，并在完成后总结：
+
+- 新增了哪些后端模型、服务和接口。
+- 新增了哪些前端组件和交互。
+- 如何初始化和使用 SQLite。
+- 如何保存项目和版本。
+- 如何导出 YAML / JSON / Markdown。
+- 如何运行测试。
+- 是否保留 Mock / AI 生成模式。
+- 当前仍然存在的限制和后续建议。
