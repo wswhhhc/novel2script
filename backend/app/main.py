@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.db.database import init_database
-from app.routers import chapters, projects, script
+from app.routers import batch, chapters, projects, script
 
 # 加载项目根目录的 .env 文件
 env_path = Path(__file__).resolve().parents[2] / ".env"
@@ -54,6 +54,7 @@ app.add_middleware(
 app.include_router(chapters.router)
 app.include_router(script.router)
 app.include_router(projects.router)
+app.include_router(batch.router)
 
 
 @app.get("/health")
