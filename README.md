@@ -12,7 +12,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-3178c6.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-[功能演示](#-功能演示) • [快速开始](#-快速开始) • [技术架构](#-技术架构) • [核心特性](#-核心特性) • [部署指南](#-部署指南)
+[功能演示](#-功能演示) • [快速开始](#-快速开始) • [技术架构](#-技术架构) • [项目结构](#-项目结构) • [核心特性](#-核心特性) • [部署指南](#-部署指南)
 
 </div>
 
@@ -227,6 +227,51 @@ graph TB
 4. 返回 YAML → ScriptValidator 校验
 5. 用户编辑 → ProjectService 保存到 SQLite
 6. 导出 → ExportService 多格式转换
+
+### 项目结构
+
+README 保留核心导航，完整文件级说明见 [项目结构说明](docs/project-structure.md)。
+
+```text
+Novel2Script/
+├── backend/                 # FastAPI 后端：API 路由、业务服务、SQLite 持久化
+│   ├── app/
+│   │   ├── routers/         # REST API：章节解析、剧本生成、校验、项目管理
+│   │   ├── services/        # 核心逻辑：AI 生成链路、Schema 校验、导出、项目版本
+│   │   ├── schemas/         # Pydantic 请求/响应/项目模型
+│   │   ├── db/              # SQLite 初始化与数据访问
+│   │   └── config/          # 环境变量与运行配置
+│   ├── tests/               # 后端单元测试与接口测试
+│   └── data/                # 本地数据库目录，运行时生成
+│
+├── frontend/                # React + TypeScript 前端应用
+│   ├── src/
+│   │   ├── components/      # 输入、章节、生成、编辑器、校验、项目、导出等 UI
+│   │   ├── api/             # 后端 API 客户端与类型定义
+│   │   └── utils/           # YAML、下载、格式化等浏览器端工具
+│   └── scripts/             # 前端 smoke test
+│
+├── prompts/                 # 五阶段 AI Prompt 模板
+│   ├── 01_chapter_analysis.txt
+│   ├── 02_character_extraction.txt
+│   ├── 03_scene_planning.txt
+│   ├── 04_script_generation.txt
+│   └── 05_yaml_fix.txt
+│
+├── schemas/                 # 剧本 YAML 的 JSON Schema 约束
+├── examples/                # 演示小说、标准输出、异常校验样例
+├── docs/                    # 需求、架构、AI 流程、部署、测试等技术文档
+├── scripts/                 # 一键启动、smoke test、重置演示数据脚本
+├── docker/                  # Nginx 等容器辅助配置
+├── submission/              # 比赛提交材料与答辩文档
+└── docker-compose.yml       # 本地/容器化一键编排入口
+```
+
+**阅读路径建议**：
+- 想快速运行：从 `README.md` 的快速开始进入，使用 `scripts/` 或 `docker-compose.yml`
+- 想理解业务：从 `backend/app/services/` 和 `prompts/` 看五阶段生成链路
+- 想改界面：从 `frontend/src/components/` 找对应页面模块
+- 想调格式：从 `schemas/script.schema.json` 和 `examples/script-output-1.yaml` 对照验证
 
 ### 技术栈
 
@@ -570,6 +615,7 @@ bash scripts/smoke-test.sh
 
 - 📋 [需求文档](docs/requirements.md)
 - 🏗️ [架构设计](docs/architecture-overview.md)
+- 🗂️ [项目结构说明](docs/project-structure.md)
 - 📐 [YAML Schema 设计](docs/yaml-schema.md)
 - 🤖 [AI 生成流程](docs/ai-generation.md)
 - 🧪 [测试报告](docs/testing-report.md)
