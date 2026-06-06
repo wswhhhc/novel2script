@@ -23,19 +23,19 @@
   <tr>
     <td align="center" width="300">
       <strong>🎭 Novel2Script 工作台</strong><br><br>
-      <a href="http://120.53.0.252/novel2/">
+      <a href="http://120.53.0.252/novel2/" target="_blank">
         <img alt="Open workspace" src="https://img.shields.io/badge/Open-Workspace-2563eb?style=for-the-badge">
       </a>
     </td>
     <td align="center" width="300">
       <strong>⚡ 后端 API 健康检查</strong><br><br>
-      <a href="http://120.53.0.252/novel2-api/health">
+      <a href="http://120.53.0.252/novel2-api/health" target="_blank">
         <img alt="Check API health" src="https://img.shields.io/badge/API-Health%20Check-16a34a?style=for-the-badge">
       </a>
     </td>
     <td align="center" width="300">
       <strong>📋 API 文档（Swagger）</strong><br><br>
-      <a href="http://120.53.0.252/novel2-api/docs">
+      <a href="http://120.53.0.252/novel2-api/docs" target="_blank">
         <img alt="Open API docs" src="https://img.shields.io/badge/Open-Swagger%20Docs-7c3aed?style=for-the-badge">
       </a>
     </td>
@@ -62,7 +62,9 @@
 
 **完整功能演示（4分钟）**：
 
-[![Novel2Script 演示视频](https://img.shields.io/badge/B站-观看演示视频-00A1D6?logo=bilibili&logoColor=white)](https://www.bilibili.com/video/BV1F37C6iE4v)
+<a href="https://www.bilibili.com/video/BV1F37C6iE4v" target="_blank">
+  <img src="https://img.shields.io/badge/B站-观看演示视频-00A1D6?logo=bilibili&logoColor=white" alt="Novel2Script 演示视频">
+</a>
 
 视频展示从小说上传到剧本导出的完整流程，包括智能章节识别、五阶段AI生成、YAML编辑、版本管理和多格式导出等核心功能。
 
