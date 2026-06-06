@@ -39,9 +39,7 @@ def load_prompt_template(prompt_file: str, **variables) -> str:
     formatted: dict[str, str] = {}
     for key, value in variables.items():
         formatted[key] = (
-            json.dumps(value, ensure_ascii=False, indent=2)
-            if isinstance(value, (dict, list))
-            else str(value)
+            json.dumps(value, ensure_ascii=False, indent=2) if isinstance(value, (dict, list)) else str(value)
         )
 
     # 第 1 步：规范化双大括号 {{var}} → {var}，统一处理

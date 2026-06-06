@@ -42,18 +42,10 @@ export class ErrorBoundary extends Component<Props, State> {
               </details>
             )}
             <div className="error-boundary-actions">
-              <button
-                type="button"
-                className="primary-button"
-                onClick={() => window.location.reload()}
-              >
+              <button type="button" className="primary-button" onClick={() => window.location.reload()}>
                 刷新页面
               </button>
-              <button
-                type="button"
-                className="primary-button"
-                onClick={this.handleReset}
-              >
+              <button type="button" className="primary-button" onClick={this.handleReset}>
                 尝试恢复
               </button>
             </div>
