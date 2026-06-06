@@ -10,13 +10,14 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-18.3+-61dafb.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-3178c6.svg)](https://www.typescriptlang.org/)
+[![CI](https://github.com/wswhhhc/novel2script/actions/workflows/ci.yml/badge.svg)](https://github.com/wswhhhc/novel2script/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 <br>
 
-## 🚀 立即体验（在线 Demo）
+## 🚀 在线 Demo / 评审入口
 
-> **评审快速入口**：以下是项目已部署的在线服务，点击即可访问 👇
+> **已部署在线服务**：评审可直接访问工作台、后端健康检查和 Swagger API 文档。
 
 <table align="center">
   <tr>
@@ -41,7 +42,15 @@
   </tr>
 </table>
 
-**快速上手**：打开工作台 → 上传 `examples/novel-sample-1.txt` → 点击"识别章节" → 点击"生成剧本" → 查看完整剧本输出 🎉
+### 建议评审路径
+
+| 步骤 | 操作 | 可验证结果 |
+|------|------|------------|
+| 1 | 打开 Novel2Script 工作台 | 前端页面正常加载 |
+| 2 | 上传 `examples/novel-sample-1.txt` | 自动填充小说内容 |
+| 3 | 点击「识别章节」 | 识别出章节列表 |
+| 4 | 点击「生成剧本」 | 生成结构化 YAML 剧本 |
+| 5 | 保存项目并导出 | 验证版本管理和多格式导出 |
 
 <br>
 
@@ -417,7 +426,7 @@ def _trim_chapters_for_ai_prompt(chapters):
 
 ## ⚡ 性能指标
 
-**测试环境**：Windows 11, Intel i5-12400, 16GB RAM, Python 3.11, Node.js 18
+**测试环境**：Windows 11, Intel i5-12400, 16GB RAM, Python 3.11, Node.js 22
 
 **后端性能**（实测平均值）：
 
@@ -502,7 +511,7 @@ bash scripts/start-dev.sh
 - 🔌 **后端 API**：http://127.0.0.1:8000
 - 📋 **API 文档**：http://127.0.0.1:8000/docs
 
-> 💡 **在线 Demo 已部署**：顶部「立即体验」区域可直接访问已上线服务，无需本地搭建。
+> 💡 **在线 Demo 已部署**：顶部「在线 Demo / 评审入口」区域可直接访问已上线服务，无需本地搭建。
 
 ### 快速体验
 
