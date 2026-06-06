@@ -33,7 +33,6 @@ novel2script/
 ```
 backend/
 ├── requirements.txt             # Python 依赖
-├── README.md                    # 后端说明
 │
 ├── app/                         # 应用代码
 │   ├── __init__.py
@@ -45,9 +44,10 @@ backend/
 │   │
 │   ├── routers/                 # API 路由层
 │   │   ├── __init__.py
-│   │   ├── chapters.py          # /api/parse-chapters
-│   │   ├── script.py            # /api/generate-script, /api/validate-yaml
-│   │   └── projects.py          # /api/projects/* 项目管理
+│   │   ├── batch.py             # /api/batch/* 批量操作
+│   │   ├── chapters.py          # /api/chapters/* 章节解析
+│   │   ├── script.py            # /api/script/* 生成、校验和流式输出
+│   │   └── projects.py          # /api/projects/* 项目、版本和导出
 │   │
 │   ├── services/                # 业务逻辑层
 │   │   ├── __init__.py
@@ -57,7 +57,9 @@ backend/
 │   │   ├── ai_client.py         # AI API 调用封装
 │   │   ├── prompt_loader.py     # Prompt 模板加载
 │   │   ├── project_service.py   # 项目 CRUD
-│   │   └── export_service.py    # 多格式导出
+│   │   ├── generation_cache.py  # AI 阶段缓存
+│   │   ├── export_service.py    # YAML/JSON/Markdown 导出
+│   │   └── pdf_export_service.py # PDF 导出
 │   │
 │   ├── schemas/                 # Pydantic 数据模型
 │   │   ├── __init__.py
@@ -91,11 +93,12 @@ backend/
 frontend/
 ├── package.json                 # npm 依赖和脚本
 ├── package-lock.json
-├── README.md
 ├── .env.example                 # 前端环境变量
 ├── .gitignore
 │
 ├── vite.config.ts               # Vite 构建配置
+├── vitest.config.ts             # Vitest 测试配置
+├── playwright.config.ts         # Playwright E2E 配置
 ├── tsconfig.json                # TypeScript 配置
 ├── tailwind.config.js           # Tailwind CSS 配置
 ├── postcss.config.js            # PostCSS 配置
@@ -132,6 +135,9 @@ frontend/
 ├── scripts/                     # 前端脚本
 │   └── smoke-test.mjs           # 前端 smoke test
 │
+├── e2e/                         # Playwright 端到端测试
+│   └── workspace.spec.ts
+│
 └── dist/                        # 构建输出（自动生成）
 ```
 
@@ -145,11 +151,8 @@ docs/
 ├── architecture-overview.md     # 架构设计
 ├── yaml-schema.md               # YAML Schema 设计说明
 ├── ai-generation.md             # AI 五阶段生成流程
-├── testing-report.md            # 测试报告
-├── deployment-final.md          # 部署指南
-├── demo-script.md               # 演示脚本
-├── acceptance-checklist.md      # 验收清单
-└── final-delivery-report.md     # 最终交付报告
+├── comparison-report.md         # 对比实验报告
+└── project-structure.md         # 项目结构说明
 ```
 
 ---
@@ -161,7 +164,6 @@ examples/
 ├── novel-sample-1.txt           # 都市小说 3 章（推荐演示）
 ├── novel-sample-2.txt           # 悬疑小说 5 章
 ├── novel-sample-3.txt           # 古装武侠 4 章
-├── novel-demo-test.txt          # 测试小说 4 章
 ├── novel-edge-too-few-chapters.txt        # 边界测试：章节不足
 ├── novel-edge-mixed-chapter-formats.txt   # 边界测试：混合格式
 │
@@ -222,9 +224,7 @@ scripts/
 
 ```
 submission/
-├── project-summary.md           # 项目摘要
-├── defense-outline.md           # 答辩提纲
-└── demo-steps.md                # 演示步骤
+└── qa-handbook.md               # 答辩问答手册
 ```
 
 ---
@@ -268,16 +268,17 @@ backend/data/*.db                # SQLite 数据库
 __pycache__/                     # Python 缓存
 *.log                            # 日志文件
 .pytest_cache/                   # pytest 缓存
+frontend/test-results/           # Playwright 测试报告
 ```
 
 ---
 
 ## 📊 项目统计
 
-- **总文件数**：约 150 个（不含 node_modules）
-- **代码行数**：约 22,000 行
-- **文档数量**：12 个（README + CLAUDE + docs/* + submission/*）
-- **测试用例**：10+ 个测试文件
+- **总文件数**：约 120 个（不含 node_modules）
+- **代码行数**：约 20,000 行
+- **文档数量**：约 10 个（README + CLAUDE + docs/* + submission/*）
+- **测试体系**：后端 pytest、前端 Vitest、Playwright E2E、smoke test
 
 ---
 

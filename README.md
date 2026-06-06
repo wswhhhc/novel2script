@@ -657,7 +657,6 @@ bash scripts/smoke-test.sh
 - 📐 [YAML Schema 设计](docs/yaml-schema.md)
 - 🤖 [AI 生成流程](docs/ai-generation.md)
 - 📊 [对比实验报告](docs/comparison-report.md)
-- 📦 [最终优化报告](docs/final-report.md)
 
 ---
 

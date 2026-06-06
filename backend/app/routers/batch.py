@@ -1,6 +1,6 @@
 """
 批量项目操作 API
-支持批量删除、批量导出等操作
+支持批量删除、批量校验和项目统计
 """
 
 from typing import List
@@ -20,18 +20,6 @@ class BatchDeleteRequest(BaseModel):
 class BatchDeleteResponse(BaseModel):
     deleted_count: int
     failed_ids: List[int]
-    errors: List[str]
-
-
-class BatchExportRequest(BaseModel):
-    project_ids: List[int]
-    format: str  # yaml, json, markdown, pdf
-
-
-class BatchExportResponse(BaseModel):
-    success_count: int
-    failed_count: int
-    download_urls: List[str]
     errors: List[str]
 
 
