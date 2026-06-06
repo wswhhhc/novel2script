@@ -16,20 +16,13 @@ interface UseVirtualScrollOptions {
  * 虚拟滚动 Hook
  * 用于优化大列表渲染性能
  */
-export function useVirtualScroll<T>(
-  items: T[],
-  containerHeight: number,
-  options: UseVirtualScrollOptions
-) {
+export function useVirtualScroll<T>(items: T[], containerHeight: number, options: UseVirtualScrollOptions) {
   const { itemHeight, overscan = 3 } = options;
   const [scrollTop, setScrollTop] = useState(0);
 
   const visibleRange = useMemo(() => {
     const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
-    const endIndex = Math.min(
-      items.length - 1,
-      Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan
-    );
+    const endIndex = Math.min(items.length - 1, Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan);
 
     return { startIndex, endIndex };
   }, [scrollTop, containerHeight, itemHeight, overscan, items.length]);

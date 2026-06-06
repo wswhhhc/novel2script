@@ -61,9 +61,9 @@ describe("YamlEditor", () => {
   it("disables buttons when no yaml content", () => {
     render(<YamlEditor {...defaultProps} yamlText="" />);
 
-    const copyBtn = screen.getByRole('button', { name: /复制/i });
-    const downloadBtn = screen.getByRole('button', { name: /下载/i });
-    const validateBtn = screen.getByRole('button', { name: /校验/i });
+    const copyBtn = screen.getByRole("button", { name: /复制/i });
+    const downloadBtn = screen.getByRole("button", { name: /下载/i });
+    const validateBtn = screen.getByRole("button", { name: /校验/i });
 
     expect(copyBtn).toBeDisabled();
     expect(downloadBtn).toBeDisabled();

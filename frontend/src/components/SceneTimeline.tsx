@@ -26,11 +26,7 @@ export function SceneTimeline({ scenes, characters = [] }: SceneTimelineProps) {
   }, [characters]);
 
   if (!scenes || scenes.length === 0) {
-    return (
-      <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
-        暂无场景数据
-      </div>
-    );
+    return <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>暂无场景数据</div>;
   }
 
   return (
@@ -50,9 +46,7 @@ export function SceneTimeline({ scenes, characters = [] }: SceneTimelineProps) {
                     {scene.id} - {scene.title}
                   </h3>
                   {scene.source_chapters && scene.source_chapters.length > 0 && (
-                    <span className="scene-badge">
-                      {scene.source_chapters.join(", ")}
-                    </span>
+                    <span className="scene-badge">{scene.source_chapters.join(", ")}</span>
                   )}
                 </div>
 
@@ -74,11 +68,7 @@ export function SceneTimeline({ scenes, characters = [] }: SceneTimelineProps) {
                   {scene.characters && scene.characters.length > 0 && (
                     <div className="scene-meta-item">
                       <Users className="icon" size={16} />
-                      <span>
-                        {scene.characters
-                          .map((charId) => characterMap.get(charId) || charId)
-                          .join(", ")}
-                      </span>
+                      <span>{scene.characters.map((charId) => characterMap.get(charId) || charId).join(", ")}</span>
                     </div>
                   )}
                 </div>
@@ -90,9 +80,7 @@ export function SceneTimeline({ scenes, characters = [] }: SceneTimelineProps) {
                   </div>
                 )}
 
-                {scene.summary && (
-                  <div className="scene-summary">{scene.summary}</div>
-                )}
+                {scene.summary && <div className="scene-summary">{scene.summary}</div>}
               </div>
             </div>
           </div>

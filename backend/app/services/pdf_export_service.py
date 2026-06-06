@@ -2,6 +2,7 @@
 PDF 导出服务
 将 YAML 剧本导出为专业格式的 PDF
 """
+
 from io import BytesIO
 from typing import Any
 
@@ -124,25 +125,29 @@ def export_project_pdf(project: ProjectDetailResponse) -> bytes:
         char_data = [["ID", "姓名", "角色", "首次出现"]]
         for char in characters:
             if isinstance(char, dict):
-                char_data.append([
-                    _safe_str(char.get("id", "")),
-                    _safe_str(char.get("name", "")),
-                    _safe_str(char.get("role", "")),
-                    _safe_str(char.get("first_appearance", "")),
-                ])
+                char_data.append(
+                    [
+                        _safe_str(char.get("id", "")),
+                        _safe_str(char.get("name", "")),
+                        _safe_str(char.get("role", "")),
+                        _safe_str(char.get("first_appearance", "")),
+                    ]
+                )
 
         char_table = Table(char_data, colWidths=[1.2 * inch, 1.5 * inch, 2 * inch, 1.3 * inch])
         char_table.setStyle(
-            TableStyle([
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e2e8f0")),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#1a202c")),
-                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, 0), 11),
-                ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
-                ("BACKGROUND", (0, 1), (-1, -1), colors.white),
-                ("GRID", (0, 0), (-1, -1), 1, colors.HexColor("#cbd5e0")),
-            ])
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e2e8f0")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#1a202c")),
+                    ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("FONTSIZE", (0, 0), (-1, 0), 11),
+                    ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+                    ("BACKGROUND", (0, 1), (-1, -1), colors.white),
+                    ("GRID", (0, 0), (-1, -1), 1, colors.HexColor("#cbd5e0")),
+                ]
+            )
         )
         story.append(char_table)
         story.append(PageBreak())

@@ -72,7 +72,9 @@ describe("ValidationPanel", () => {
       valid: false,
       errors: ["错误A", "错误B", "错误C"],
     };
-    const { container } = render(<ValidationPanel validation={validation} localSyntaxError={null} generating={false} />);
+    const { container } = render(
+      <ValidationPanel validation={validation} localSyntaxError={null} generating={false} />
+    );
 
     const errorItems = container.querySelectorAll("li");
     expect(errorItems.length).toBeGreaterThanOrEqual(3);

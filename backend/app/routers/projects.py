@@ -14,7 +14,6 @@ from app.schemas.projects import (
 )
 from app.services.export_service import export_project_json, export_project_markdown, export_project_yaml
 from app.services.pdf_export_service import export_project_pdf
-from app.services.pdf_export_service import export_project_pdf
 from app.services.project_service import (
     create_project,
     create_version,
@@ -180,8 +179,6 @@ def export_pdf_endpoint(project_id: int) -> Response:
 
         return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
     except Exception as exc:
-        from fastapi import HTTPException, status
-
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"PDF 导出失败：{str(exc)}"
         ) from exc

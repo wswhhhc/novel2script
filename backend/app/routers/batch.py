@@ -2,6 +2,7 @@
 批量项目操作 API
 支持批量删除、批量导出等操作
 """
+
 from typing import List
 
 from fastapi import APIRouter, HTTPException, status
@@ -92,21 +93,25 @@ def batch_validate_projects(request: BatchDeleteRequest) -> dict:
             project = get_project_detail(project_id)
             validation = validate_script_yaml(project.current_yaml)
 
-            results.append({
-                "project_id": project_id,
-                "title": project.title,
-                "valid": validation.valid,
-                "error_count": len(validation.errors),
-                "errors": validation.errors[:3] if not validation.valid else [],  # 只返回前3个错误
-            })
+            results.append(
+                {
+                    "project_id": project_id,
+                    "title": project.title,
+                    "valid": validation.valid,
+                    "error_count": len(validation.errors),
+                    "errors": validation.errors[:3] if not validation.valid else [],  # 只返回前3个错误
+                }
+            )
         except Exception as exc:
-            results.append({
-                "project_id": project_id,
-                "title": "未知",
-                "valid": False,
-                "error_count": 1,
-                "errors": [str(exc)],
-            })
+            results.append(
+                {
+                    "project_id": project_id,
+                    "title": "未知",
+                    "valid": False,
+                    "error_count": 1,
+                    "errors": [str(exc)],
+                }
+            )
 
     valid_count = sum(1 for r in results if r["valid"])
     invalid_count = len(results) - valid_count

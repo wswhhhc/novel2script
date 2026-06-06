@@ -5,10 +5,7 @@
 /**
  * 节流函数
  */
-export function throttle<T extends (...args: any[]) => any>(
-  func: T,
-  limit: number
-): (...args: Parameters<T>) => void {
+export function throttle<T extends (...args: any[]) => any>(func: T, limit: number): (...args: Parameters<T>) => void {
   let inThrottle: boolean;
   return function (this: any, ...args: Parameters<T>) {
     if (!inThrottle) {
@@ -22,10 +19,7 @@ export function throttle<T extends (...args: any[]) => any>(
 /**
  * 防抖函数
  */
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  delay: number
-): (...args: Parameters<T>) => void {
+export function debounce<T extends (...args: any[]) => any>(func: T, delay: number): (...args: Parameters<T>) => void {
   let timeoutId: ReturnType<typeof setTimeout>;
   return function (this: any, ...args: Parameters<T>) {
     clearTimeout(timeoutId);
@@ -36,9 +30,7 @@ export function debounce<T extends (...args: any[]) => any>(
 /**
  * 代码分割 - 动态导入组件
  */
-export async function lazyLoadComponent<T>(
-  importFunc: () => Promise<{ default: T }>
-): Promise<T> {
+export async function lazyLoadComponent<T>(importFunc: () => Promise<{ default: T }>): Promise<T> {
   const module = await importFunc();
   return module.default;
 }

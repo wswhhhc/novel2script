@@ -36,7 +36,7 @@ jobs:
           cd backend
           pip install black flake8
           black --check app tests --line-length 120
-          flake8 app tests --count --statistics
+          flake8 app tests --count --statistics --max-line-length=120 --extend-ignore=E203
 
   frontend-test:
     name: Frontend Tests & Build
@@ -49,7 +49,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 

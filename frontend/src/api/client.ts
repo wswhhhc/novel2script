@@ -214,11 +214,7 @@ function extractDownloadFileName(contentDisposition: string | null, format: Expo
   return fallbackMatch?.[1] ?? `novel2script_script.${extension}`;
 }
 
-function consumeNdjsonBuffer(
-  buffer: string,
-  onEvent: (event: GenerateScriptStreamEvent) => void,
-  flush = false
-) {
+function consumeNdjsonBuffer(buffer: string, onEvent: (event: GenerateScriptStreamEvent) => void, flush = false) {
   const lines = buffer.split("\n");
   const pending = flush ? "" : (lines.pop() ?? "");
 

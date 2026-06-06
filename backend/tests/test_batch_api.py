@@ -2,7 +2,6 @@
 测试批量操作 API
 """
 
-
 CHAPTERS = [
     {"id": "C001", "title": "第一章", "content": "开始", "word_count": 2},
     {"id": "C002", "title": "第二章", "content": "发展", "word_count": 2},

@@ -1,6 +1,7 @@
 """
 测试 AI 生成的并发场景和错误恢复
 """
+
 import pytest
 from unittest.mock import patch
 from app.services.script_generator import generate_script_with_ai
@@ -53,12 +54,7 @@ def test_generation_with_oversized_input():
     from app.services.script_generator import _trim_chapters_for_ai_prompt
 
     # 创建一个超长章节
-    large_chapter = {
-        "id": "C001",
-        "title": "超长章节",
-        "content": "内容" * 10000,  # 2万字
-        "word_count": 20000
-    }
+    large_chapter = {"id": "C001", "title": "超长章节", "content": "内容" * 10000, "word_count": 20000}  # 2万字
 
     chapters = [
         large_chapter,
@@ -106,12 +102,7 @@ def test_chapter_trimming_preserves_key_content():
     from app.services.script_generator import _trim_chapters_for_ai_prompt
 
     long_content = "开头内容" + "中间填充" * 5000 + "结尾内容"
-    chapters = [{
-        "id": "C001",
-        "title": "超长章节",
-        "content": long_content,
-        "word_count": len(long_content)
-    }]
+    chapters = [{"id": "C001", "title": "超长章节", "content": long_content, "word_count": len(long_content)}]
 
     trimmed = _trim_chapters_for_ai_prompt(chapters)
 

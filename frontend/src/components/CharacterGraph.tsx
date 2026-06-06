@@ -111,11 +111,7 @@ export function CharacterGraph({ characters }: CharacterGraphProps) {
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
 
   if (!characters || characters.length === 0) {
-    return (
-      <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
-        暂无角色数据
-      </div>
-    );
+    return <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>暂无角色数据</div>;
   }
 
   return (
