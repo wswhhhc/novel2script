@@ -4,9 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-Novel2Script 是 AI 小说转剧本工具，支持章节识别、AI 多阶段剧本生成、YAML Schema 校验、Monaco 编辑器、SQLite 项目管理和多格式导出。
+Novel2Script 是 AI 驱动的小说转剧本系统，将小说文本转换为结构化 YAML 剧本。
 
-**核心特性**：默认 Mock 模式不调用真实 AI，适合演示；AI 模式需显式配置 `ENABLE_AI_GENERATION=true`。
+**核心架构**：
+- **五阶段 AI 生成链路**：章节分析 → 角色提取 → 场景规划 → 剧本生成 → 自动修复
+- **332行 JSON Schema 校验**：确保输出符合行业标准
+- **双模式运行**：Mock 模式（演示）/ AI 模式（需配置 `ENABLE_AI_GENERATION=true`）
+
+**技术栈**：FastAPI + SQLite + React + TypeScript + Monaco Editor
 
 ## 常用命令
 
@@ -263,5 +268,27 @@ script:
 - `validation`：Schema 校验结果
 - `dirty`：是否有未保存修改
 
+### 可视化组件（新增）
+- **CharacterGraph.tsx**：角色关系图（基于 @xyflow/react）
+- **SceneTimeline.tsx**：场景时间线（纯 CSS）
+- 性能优化工具：`hooks/performance.ts`、`utils/performance.ts`
+
+### 批量操作 API（新增）
+- `POST /api/batch/delete`：批量删除项目（最多50个）
+- `POST /api/batch/validate`：批量校验项目
+- `GET /api/batch/stats`：项目统计信息
+
+### PDF 导出功能（新增）
+- `GET /api/projects/{id}/export/pdf`：导出专业格式剧本
+- 使用 reportlab 库生成，包含封面、角色表、场景详情
+
 ### CORS 配置
 后端 `main.py` 中硬编码允许 `http://127.0.0.1:5173` 和 `http://localhost:5173`。如更改前端端口，需同步更新 `allow_origins`。
+
+## 项目文档
+
+核心文档位于 `docs/` 和 `submission/`：
+- **docs/final-report.md**：完整优化总结报告（评分 9.4/10）
+- **docs/comparison-report.md**：vs ChatGPT/Celtx 对比分析
+- **submission/qa-handbook.md**：答辩问答手册（10个核心问题）
+- **docs/yaml-schema.md**：YAML 规范详细说明
