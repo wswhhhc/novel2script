@@ -1,6 +1,12 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = BACKEND_ROOT.parent
+load_dotenv(PROJECT_ROOT / ".env")
+
 
 class Settings:
     # 章节限制
@@ -10,8 +16,8 @@ class Settings:
     max_chapter_length: int = 10_000
 
     # 路径配置
-    backend_root: Path = Path(__file__).resolve().parents[2]
-    project_root: Path = backend_root.parent
+    backend_root: Path = BACKEND_ROOT
+    project_root: Path = PROJECT_ROOT
     schema_path: Path = project_root / "schemas" / "script.schema.json"
     sample_output_path: Path = project_root / "examples" / "script-output-1.yaml"
     prompts_dir: Path = project_root / "prompts"

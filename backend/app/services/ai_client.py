@@ -7,6 +7,7 @@ MODEL_API_KEY 后才会调用模型。
 
 import json
 import time
+from collections.abc import Iterator
 from typing import Any
 
 from app.config.settings import settings
@@ -56,6 +57,32 @@ def call_ai_model(prompt: str, max_retries: int | None = None) -> str:
     raise last_error or AIClientError("AI 调用失败")
 
 
+def stream_ai_model(prompt: str) -> Iterator[str]:
+    """
+    调用 AI 模型并逐块返回生成内容。
+
+    流式接口只用于直接面向前端的长文本生成；分阶段 JSON 分析仍使用
+    call_ai_model，避免把中间结构暴露给用户。
+    """
+    if not settings.enable_ai_generation:
+        raise AIClientError("AI 生成未启用。请设置 ENABLE_AI_GENERATION=true 后再调用真实模型")
+
+    if not settings.model_api_key:
+        raise AIClientError("AI 模式已启用，但未配置 MODEL_API_KEY")
+
+    if not settings.model_name:
+        raise AIClientError("AI 模式已启用，但未配置 MODEL_NAME")
+
+    provider = settings.model_provider.lower().strip()
+    if provider == "openai":
+        yield from _stream_openai(prompt)
+        return
+    if provider == "anthropic":
+        yield from _stream_anthropic(prompt)
+        return
+    raise AIClientError(f"不支持的 AI 提供商：{provider}")
+
+
 def _call_openai(prompt: str) -> str:
     try:
         from openai import APIConnectionError, APIError, APITimeoutError, AuthenticationError, OpenAI, RateLimitError
@@ -100,6 +127,54 @@ def _call_openai(prompt: str) -> str:
     return content.strip()
 
 
+def _stream_openai(prompt: str) -> Iterator[str]:
+    try:
+        from openai import APIConnectionError, APIError, APITimeoutError, AuthenticationError, OpenAI, RateLimitError
+    except ImportError as exc:
+        raise AIClientError("未安装 openai 包。请运行：pip install openai") from exc
+
+    client = OpenAI(
+        api_key=settings.model_api_key,
+        base_url=settings.model_base_url or None,
+        timeout=settings.model_timeout,
+    )
+
+    try:
+        stream = client.chat.completions.create(
+            model=settings.model_name,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=settings.model_temperature,
+            max_tokens=settings.model_max_tokens,
+            stream=True,
+        )
+
+        yielded = False
+        for chunk in stream:
+            try:
+                content = chunk.choices[0].delta.content
+            except (AttributeError, IndexError):
+                content = None
+            if content:
+                yielded = True
+                yield content
+
+        if not yielded:
+            raise AIClientError("OpenAI 兼容 API 返回内容为空")
+    except AuthenticationError as exc:
+        raise AIClientError("OpenAI 兼容 API 认证失败，请检查 MODEL_API_KEY") from exc
+    except APITimeoutError as exc:
+        raise AIClientError(f"OpenAI 兼容 API 调用超时（{settings.model_timeout}s）") from exc
+    except RateLimitError as exc:
+        raise AIClientError("OpenAI 兼容 API 限流或额度不足（429）") from exc
+    except APIConnectionError as exc:
+        raise AIClientError("OpenAI 兼容 API 连接失败，请检查 MODEL_BASE_URL 和网络") from exc
+    except APIError as exc:
+        status_code = getattr(exc, "status_code", None)
+        if status_code and int(status_code) >= 500:
+            raise AIClientError(f"OpenAI 兼容 API 服务端错误（{status_code}）") from exc
+        raise AIClientError(f"OpenAI 兼容 API 调用失败（{status_code or 'unknown'}）") from exc
+
+
 def _call_anthropic(prompt: str) -> str:
     try:
         import anthropic
@@ -138,6 +213,44 @@ def _call_anthropic(prompt: str) -> str:
         raise AIClientError("Anthropic API 返回内容为空")
 
     return content.strip()
+
+
+def _stream_anthropic(prompt: str) -> Iterator[str]:
+    try:
+        import anthropic
+    except ImportError as exc:
+        raise AIClientError("未安装 anthropic 包。请运行：pip install anthropic") from exc
+
+    client = anthropic.Anthropic(api_key=settings.model_api_key, timeout=settings.model_timeout)
+
+    try:
+        yielded = False
+        with client.messages.stream(
+            model=settings.model_name,
+            max_tokens=settings.model_max_tokens,
+            temperature=settings.model_temperature,
+            messages=[{"role": "user", "content": prompt}],
+        ) as stream:
+            for content in stream.text_stream:
+                if content:
+                    yielded = True
+                    yield content
+
+        if not yielded:
+            raise AIClientError("Anthropic API 返回内容为空")
+    except anthropic.AuthenticationError as exc:
+        raise AIClientError("Anthropic API 认证失败，请检查 MODEL_API_KEY") from exc
+    except anthropic.APITimeoutError as exc:
+        raise AIClientError(f"Anthropic API 调用超时（{settings.model_timeout}s）") from exc
+    except anthropic.RateLimitError as exc:
+        raise AIClientError("Anthropic API 限流或额度不足（429）") from exc
+    except anthropic.APIStatusError as exc:
+        status_code = getattr(exc, "status_code", None)
+        if status_code and int(status_code) >= 500:
+            raise AIClientError(f"Anthropic API 服务端错误（{status_code}）") from exc
+        raise AIClientError(f"Anthropic API 调用失败（{status_code or 'unknown'}）") from exc
+    except anthropic.APIError as exc:
+        raise AIClientError("Anthropic API 调用失败") from exc
 
 
 def parse_json_response(text: str, stage_name: str = "AI 阶段") -> Any:

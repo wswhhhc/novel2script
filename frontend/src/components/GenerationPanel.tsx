@@ -14,6 +14,8 @@ interface GenerationPanelProps {
   parsing: boolean;
   generating: boolean;
   validating: boolean;
+  generationProgress: number;
+  generationMessage: string;
   chapterCount: number;
   generationMode: GenerationModeResponse | null;
   onParse: () => void;
@@ -26,12 +28,14 @@ export function GenerationPanel({
   parsing,
   generating,
   validating,
+  generationProgress,
+  generationMessage,
   chapterCount,
   generationMode,
   onParse,
   onGenerate,
 }: GenerationPanelProps) {
-  const generationProgress = generating ? 60 : validating ? 100 : 0;
+  const visibleProgress = generating ? Math.max(5, generationProgress) : validating ? 100 : 0;
   const modeLabel =
     generationMode?.mode === "ai" ? "AI 模式" : generationMode?.mode === "mock" ? "Mock 模式" : "模式未知";
   const modeClass = generationMode?.mode === "ai" ? "ai" : "neutral";
@@ -74,11 +78,11 @@ export function GenerationPanel({
       {generating || validating ? (
         <div className="generation-progress" aria-label="生成进度">
           <div className="progress-head">
-            <span>{generating ? "正在生成" : "正在校验"}</span>
-            <strong>{generationProgress}%</strong>
+            <span>{generating ? generationMessage || "正在生成" : "正在校验"}</span>
+            <strong>{visibleProgress}%</strong>
           </div>
           <div className="progress-track">
-            <div style={{ width: `${generationProgress}%` }} />
+            <div style={{ width: `${visibleProgress}%` }} />
           </div>
         </div>
       ) : null}

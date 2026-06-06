@@ -5,7 +5,7 @@ import {
   createVersion,
   deleteProject,
   exportProject,
-  generateScript,
+  generateScriptStream,
   getGenerationMode,
   getProject,
   listProjects,
@@ -59,6 +59,8 @@ function App() {
   const [dirty, setDirty] = useState(false);
   const [parsing, setParsing] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState(0);
+  const [generationMessage, setGenerationMessage] = useState("");
   const [validating, setValidating] = useState(false);
   const [projectLoading, setProjectLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -154,21 +156,61 @@ function App() {
     }
 
     setGenerating(true);
-    setStatus({ tone: "info", message: "正在生成 YAML 剧本..." });
+    setGenerationProgress(5);
+    setGenerationMessage("正在准备流式生成 YAML 剧本...");
+    setYamlText("");
+    setValidation(null);
+    setStatus({ tone: "info", message: "正在准备流式生成 YAML 剧本..." });
 
     try {
-      const result = await generateScript(title.trim(), genre.trim() || "未分类", parseResult.chapters);
-      setYamlText(result.yaml);
-      setValidation(result.validation);
-      setDirty(true);
-      setStatus({
-        tone: result.validation.valid ? "success" : "warning",
-        message: result.validation.valid ? "剧本生成成功，Schema 校验通过。" : "剧本生成成功，但 Schema 校验有错误。",
+      await generateScriptStream(title.trim(), genre.trim() || "未分类", parseResult.chapters, (event) => {
+        if ("progress" in event && typeof event.progress === "number") {
+          setGenerationProgress(event.progress);
+        }
+
+        if (event.type === "status") {
+          setGenerationMessage(event.message);
+          setStatus({ tone: "info", message: event.message });
+          return;
+        }
+
+        if (event.type === "yaml_delta") {
+          setYamlText((current) => current + event.delta);
+          setValidation(null);
+          setDirty(true);
+          return;
+        }
+
+        if (event.type === "validation") {
+          setValidation(event.validation);
+          return;
+        }
+
+        if (event.type === "done") {
+          setYamlText(event.yaml);
+          setValidation(event.validation);
+          setDirty(true);
+          setGenerationProgress(100);
+          setGenerationMessage(event.message ?? "剧本生成完成。");
+          setStatus({
+            tone: event.validation.valid ? "success" : "warning",
+            message:
+              event.message ??
+              (event.validation.valid ? "剧本生成成功，Schema 校验通过。" : "剧本生成成功，但 Schema 校验有错误。"),
+          });
+          return;
+        }
+
+        if (event.type === "error") {
+          throw new Error(event.message);
+        }
       });
     } catch (error) {
       setStatus({ tone: "error", message: error instanceof Error ? error.message : "剧本生成请求失败" });
     } finally {
       setGenerating(false);
+      setGenerationProgress(0);
+      setGenerationMessage("");
     }
   }
 
@@ -533,6 +575,8 @@ function App() {
             parsing={parsing}
             generating={generating}
             validating={validating}
+            generationProgress={generationProgress}
+            generationMessage={generationMessage}
             chapterCount={parseResult?.chapter_count ?? 0}
             generationMode={generationMode}
             onParse={handleParse}

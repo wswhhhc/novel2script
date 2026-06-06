@@ -10,6 +10,9 @@ if str(BACKEND_ROOT) not in sys.path:
     sys.path.insert(0, str(BACKEND_ROOT))
 
 os.environ.setdefault("NOVEL2SCRIPT_DB_PATH", str(BACKEND_ROOT / ".pytest_cache" / "novel2script-test.db"))
+os.environ["ENABLE_AI_GENERATION"] = "false"
+os.environ["MODEL_API_KEY"] = ""
+os.environ["MODEL_NAME"] = ""
 
 
 @pytest.fixture

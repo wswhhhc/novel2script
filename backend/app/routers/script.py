@@ -1,9 +1,18 @@
+import json
+from collections.abc import Iterator
+
 from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 
 from app.config.settings import settings
 from app.schemas.requests import GenerateScriptRequest, ValidateScriptRequest
 from app.schemas.responses import GenerateScriptResponse, ValidationResponse
-from app.services.script_generator import generate_script_mock, generate_script_with_ai
+from app.services.script_generator import (
+    generate_script_mock,
+    generate_script_stream_events,
+    generate_script_with_ai,
+    validate_script_generation_input,
+)
 from app.services.script_validator import validate_script_yaml
 
 router = APIRouter(prefix="/api/script", tags=["script"])
@@ -95,6 +104,38 @@ def validate_script_endpoint(request: ValidateScriptRequest) -> ValidationRespon
 
 
 @router.post(
+    "/generate/stream",
+    summary="流式生成剧本",
+    description=(
+        "根据小说章节生成结构化剧本，并以 NDJSON 逐行返回进度和 YAML 片段。\n\n"
+        "事件格式：`status` 表示阶段进度，`yaml_delta` 表示新增 YAML 文本，"
+        "`validation` 表示校验结果，`done` 表示完整结果。"
+    ),
+    responses={
+        200: {
+            "description": "流式生成事件",
+            "content": {
+                "application/x-ndjson": {
+                    "example": '{"type":"status","message":"阶段 4/5：正在流式生成 YAML 剧本..."}\n'
+                    '{"type":"yaml_delta","delta":"script:\\n  title: 示例"}\n'
+                    '{"type":"done","yaml":"script:\\n  title: 示例","validation":{"valid":true,"errors":[]}}\n'
+                }
+            },
+        },
+        400: {"description": "输入验证失败（章节数不足、格式错误等）"},
+    },
+)
+def generate_script_stream_endpoint(request: GenerateScriptRequest) -> StreamingResponse:
+    """流式生成剧本，供前端边生成边展示"""
+    validate_script_generation_input(request.title, request.genre, request.chapters)
+    return StreamingResponse(
+        _iter_stream_events(request),
+        media_type="application/x-ndjson; charset=utf-8",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+@router.post(
     "/generate",
     response_model=GenerateScriptResponse,
     summary="生成剧本",
@@ -141,3 +182,8 @@ def generate_script_endpoint(request: GenerateScriptRequest) -> GenerateScriptRe
         return generate_script_with_ai(request.title, request.genre, request.chapters)
     else:
         return generate_script_mock(request.title, request.genre, request.chapters)
+
+
+def _iter_stream_events(request: GenerateScriptRequest) -> Iterator[str]:
+    for event in generate_script_stream_events(request.title, request.genre, request.chapters):
+        yield json.dumps(event, ensure_ascii=False) + "\n"

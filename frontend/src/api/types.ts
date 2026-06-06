@@ -23,6 +23,34 @@ export interface GenerateScriptResponse {
   validation: ValidationResponse;
 }
 
+export type GenerateScriptStreamEvent =
+  | {
+      type: "status";
+      message: string;
+      progress?: number;
+    }
+  | {
+      type: "yaml_delta";
+      delta: string;
+      progress?: number;
+    }
+  | {
+      type: "validation";
+      validation: ValidationResponse;
+      progress?: number;
+    }
+  | {
+      type: "done";
+      yaml: string;
+      validation: ValidationResponse;
+      message?: string;
+      progress?: number;
+    }
+  | {
+      type: "error";
+      message: string;
+    };
+
 export interface GenerationModeResponse {
   mode: "mock" | "ai";
   ai_enabled: boolean;

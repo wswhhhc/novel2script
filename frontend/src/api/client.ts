@@ -1,6 +1,7 @@
 import type {
   Chapter,
   GenerateScriptResponse,
+  GenerateScriptStreamEvent,
   GenerationModeResponse,
   HealthResponse,
   ParseChaptersResponse,
@@ -98,6 +99,48 @@ export function generateScript(title: string, genre: string, chapters: Chapter[]
   });
 }
 
+export async function generateScriptStream(
+  title: string,
+  genre: string,
+  chapters: Chapter[],
+  onEvent: (event: GenerateScriptStreamEvent) => void
+) {
+  const response = await fetch(`${API_BASE_URL}/api/script/generate/stream`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ title, genre, chapters }),
+  });
+
+  if (!response.ok) {
+    const contentType = response.headers.get("content-type") ?? "";
+    const data = contentType.includes("application/json") ? await response.json() : await response.text();
+    throw new Error(extractErrorMessage(data, response.statusText));
+  }
+
+  if (!response.body) {
+    throw new Error("浏览器不支持读取流式响应");
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let buffer = "";
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) {
+      break;
+    }
+
+    buffer += decoder.decode(value, { stream: true });
+    buffer = consumeNdjsonBuffer(buffer, onEvent);
+  }
+
+  buffer += decoder.decode();
+  consumeNdjsonBuffer(buffer, onEvent, true);
+}
+
 export function listProjects() {
   return request<ProjectSummary[]>("/api/projects");
 }
@@ -169,4 +212,36 @@ function extractDownloadFileName(contentDisposition: string | null, format: Expo
 
   const fallbackMatch = contentDisposition.match(/filename="([^"]+)"/);
   return fallbackMatch?.[1] ?? `novel2script_script.${extension}`;
+}
+
+function consumeNdjsonBuffer(
+  buffer: string,
+  onEvent: (event: GenerateScriptStreamEvent) => void,
+  flush = false
+) {
+  const lines = buffer.split("\n");
+  const pending = flush ? "" : (lines.pop() ?? "");
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      continue;
+    }
+
+    onEvent(parseStreamEvent(trimmed));
+  }
+
+  if (flush && pending.trim()) {
+    onEvent(parseStreamEvent(pending.trim()));
+  }
+
+  return pending;
+}
+
+function parseStreamEvent(line: string): GenerateScriptStreamEvent {
+  try {
+    return JSON.parse(line) as GenerateScriptStreamEvent;
+  } catch (error) {
+    throw new Error(`流式响应解析失败：${line.slice(0, 120)}`);
+  }
 }

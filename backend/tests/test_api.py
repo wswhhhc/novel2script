@@ -58,6 +58,25 @@ def test_generate_script_mock_endpoint():
     assert data["validation"]["valid"] is True
 
 
+def test_generate_script_mock_stream_endpoint():
+    chapters = [
+        {"id": "C001", "title": "第一章", "content": "正文一", "word_count": 3},
+        {"id": "C002", "title": "第二章", "content": "正文二", "word_count": 3},
+        {"id": "C003", "title": "第三章", "content": "正文三", "word_count": 3},
+    ]
+
+    response = client.post(
+        "/api/script/generate/stream",
+        json={"title": "测试小说", "genre": "悬疑", "chapters": chapters},
+    )
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("application/x-ndjson")
+    assert '"type": "yaml_delta"' in response.text
+    assert '"type": "done"' in response.text
+    assert '"valid": true' in response.text
+
+
 def test_generation_mode_endpoint_defaults_to_mock():
     response = client.get("/api/script/mode")
 
