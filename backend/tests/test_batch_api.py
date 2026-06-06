@@ -1,7 +1,69 @@
 """
 测试批量操作 API
 """
-import pytest
+
+
+CHAPTERS = [
+    {"id": "C001", "title": "第一章", "content": "开始", "word_count": 2},
+    {"id": "C002", "title": "第二章", "content": "发展", "word_count": 2},
+    {"id": "C003", "title": "第三章", "content": "结局", "word_count": 2},
+]
+
+
+def _project_payload(title: str, genre: str = "都市", yaml_text: str | None = None) -> dict:
+    return {
+        "title": title,
+        "genre": genre,
+        "source_content": "第一章 开始\n第二章 发展\n第三章 结局",
+        "chapters": CHAPTERS,
+        "yaml": yaml_text or _minimal_invalid_yaml(),
+        "validation": {"valid": False, "errors": []},
+        "generation_mode": "mock",
+    }
+
+
+def _minimal_invalid_yaml() -> str:
+    return "script:\n  title: 测试"
+
+
+def _valid_yaml() -> str:
+    return """script:
+  title: 测试剧本
+  genre: 都市
+  version: "1.0.0"
+  source:
+    chapter_count: 3
+    chapters:
+      - id: C001
+        title: 第一章
+      - id: C002
+        title: 第二章
+      - id: C003
+        title: 第三章
+  characters:
+    - id: CHAR001
+      name: 张三
+      role: 主角
+      first_appearance: C001
+  scenes:
+    - id: S001
+      title: 开场
+      source_chapters: [C001]
+      location: 咖啡馆
+      time: 白天
+      characters: [CHAR001]
+      purpose: 介绍主角
+      beats:
+        - type: action
+          text: 张三走进咖啡馆
+        - type: dialogue
+          character: CHAR001
+          text: 今天一定要查清楚。
+        - type: transition
+          text: 镜头切向窗外
+  adaptation_notes: []
+  open_questions: []
+"""
 
 
 def test_batch_delete_projects(test_client):
@@ -11,13 +73,7 @@ def test_batch_delete_projects(test_client):
     for i in range(3):
         response = test_client.post(
             "/api/projects",
-            json={
-                "title": f"批量测试项目{i+1}",
-                "genre": "都市",
-                "source_content": "第一章 开始\n第二章 发展\n第三章 结局",
-                "current_yaml": "script:\n  title: 测试",
-                "chapter_count": 3,
-            },
+            json=_project_payload(f"批量测试项目{i + 1}"),
         )
         assert response.status_code == 200
         project_ids.append(response.json()["id"])
@@ -62,45 +118,9 @@ def test_batch_delete_exceeds_limit(test_client):
 
 def test_batch_validate_projects(test_client):
     """测试批量校验项目"""
-    # 创建一个有效项目
-    valid_yaml = """script:
-  title: 测试剧本
-  genre: 都市
-  version: "1.0.0"
-  source:
-    chapter_count: 3
-    chapters:
-      - id: C001
-        title: 第一章
-  characters:
-    - id: CHAR001
-      name: 张三
-      role: 主角
-      first_appearance: C001
-  scenes:
-    - id: S001
-      title: 开场
-      source_chapters: [C001]
-      location: 咖啡馆
-      time: 白天
-      characters: [CHAR001]
-      purpose: 介绍主角
-      beats:
-        - type: action
-          text: 张三走进咖啡馆
-  adaptation_notes: []
-  open_questions: []
-"""
-
     response = test_client.post(
         "/api/projects",
-        json={
-            "title": "有效项目",
-            "genre": "都市",
-            "source_content": "第一章\n第二章\n第三章",
-            "current_yaml": valid_yaml,
-            "chapter_count": 3,
-        },
+        json=_project_payload("有效项目", yaml_text=_valid_yaml()),
     )
     assert response.status_code == 200
     valid_id = response.json()["id"]
@@ -110,13 +130,7 @@ def test_batch_validate_projects(test_client):
 
     response = test_client.post(
         "/api/projects",
-        json={
-            "title": "无效项目",
-            "genre": "悬疑",
-            "source_content": "第一章\n第二章\n第三章",
-            "current_yaml": invalid_yaml,
-            "chapter_count": 3,
-        },
+        json=_project_payload("无效项目", genre="悬疑", yaml_text=invalid_yaml),
     )
     assert response.status_code == 200
     invalid_id = response.json()["id"]
@@ -138,13 +152,7 @@ def test_batch_stats(test_client):
     for i in range(3):
         test_client.post(
             "/api/projects",
-            json={
-                "title": f"统计测试{i+1}",
-                "genre": "都市" if i < 2 else "悬疑",
-                "source_content": "第一章\n第二章\n第三章",
-                "current_yaml": "script:\n  title: 测试",
-                "chapter_count": 3,
-            },
+            json=_project_payload(f"统计测试{i + 1}", genre="都市" if i < 2 else "悬疑"),
         )
 
     response = test_client.get("/api/batch/stats")
