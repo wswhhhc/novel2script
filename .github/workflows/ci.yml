@@ -57,6 +57,7 @@ jobs:
         run: |
           cd frontend
           npm ci
+          npx playwright install --with-deps chromium
 
       - name: Run tests
         run: |
@@ -68,7 +69,12 @@ jobs:
           cd frontend
           npm run build
 
+      - name: Run E2E tests
+        run: |
+          cd frontend
+          npm run e2e
+
       - name: Check code formatting
         run: |
           cd frontend
-          npx prettier --check "src/**/*.{ts,tsx}"
+          npx prettier --check "src/**/*.{ts,tsx}" "e2e/**/*.ts" "playwright.config.ts" "vitest.config.ts"

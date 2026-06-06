@@ -12,7 +12,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-3178c6.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-[功能演示](#-功能演示) • [快速开始](#-快速开始) • [技术架构](#-技术架构) • [项目结构](#-项目结构) • [核心特性](#-核心特性) • [部署指南](#-部署指南)
+[功能演示](#-功能演示) • [快速开始](#-快速开始) • [技术架构](#-技术架构) • [项目结构](#-项目结构) • [核心特性](#-核心特性) • [Docker 部署](#-docker-部署)
 
 ---
 
@@ -30,14 +30,24 @@
 
 ## 📋 项目简介
 
-**Novel2Script** 是一个面向小说作者、编剧初学者和短剧创作者的 AI 辅助剧本创作平台。通过创新的**五阶段 AI 生成链路**和**结构化 YAML Schema 设计**，将小说文本智能转换为符合行业标准的剧本初稿，大幅降低剧本创作门槛，提升创作效率。
+**Novel2Script** 是一个面向小说作者、编剧初学者和短剧创作者的 AI 辅助剧本创作平台。项目围绕“小说文本如何变成可编辑、可校验、可导出的剧本初稿”设计了**五阶段 AI 生成流程**和**结构化 YAML Schema**，让大模型输出从普通文本变成可持续迭代的创作资产。
+
+### 3 分钟看懂项目
+
+| 评审关注点 | 项目回答 |
+|------------|----------|
+| **解决什么问题** | 小说改编剧本门槛高、格式难统一、AI 直接生成结果难维护 |
+| **核心方案** | 章节分析 → 角色提取 → 场景规划 → 剧本生成 → Schema 校验/自动修复 |
+| **主要产物** | 结构化 YAML 剧本，可编辑、可校验，可导出 YAML/JSON/Markdown/PDF |
+| **工程支撑** | FastAPI + React + SQLite，Mock/AI 双模式，GitHub Actions 持续集成 |
+| **验证方式** | 后端单元/接口测试、前端组件测试、Playwright E2E、smoke test |
 
 ### 🎯 核心价值
 
 | 痛点 | 解决方案 | 价值 |
 |------|---------|------|
-| 📝 **小说改编门槛高** | AI 五阶段智能分析（章节→角色→场景→剧本→修复） | 自动完成 80% 基础工作 |
-| 🎭 **剧本格式复杂** | 严格的 YAML Schema 校验 + 可视化编辑器 | 确保输出符合行业规范 |
+| 📝 **小说改编门槛高** | AI 五阶段智能分析（章节→角色→场景→剧本→修复） | 快速生成可继续打磨的结构化初稿 |
+| 🎭 **剧本格式复杂** | 严格的 YAML Schema 校验 + 可视化编辑器 | 让输出格式可检查、可修复、可复用 |
 | 🔄 **迭代成本高** | 版本快照 + 一键恢复 + 多格式导出 | 灵活管理创作过程 |
 | 🚀 **上手学习慢** | Mock 模式演示 + 示例数据 + 完整文档 | 零成本体验完整流程 |
 
@@ -61,7 +71,7 @@
 
 ### 2️⃣ AI 五阶段剧本生成
 
-创新的多阶段生成流程，确保输出质量和结构完整性。
+面向小说改编场景设计的多阶段生成流程，用中间结构和 Schema 校验提升输出稳定性。
 
 ![AI 生成流程](docs/images/screenshot-2-generation-process.png)
 
@@ -149,12 +159,13 @@ graph TB
 | **YAML** | 机器可读、版本控制 | 原始格式，保留完整结构 |
 | **JSON** | API 集成、数据处理 | 标准化数据交换格式 |
 | **Markdown** | 人类阅读、打印分享 | 格式化排版，包含角色表、场景列表 |
+| **PDF** | 答辩展示、打印归档 | 封面、角色表、场景与对白排版 |
 
 ---
 
 ## 🏗️ 技术架构
 
-> 💡 **核心创新**：业界首创的五阶段 AI 生成链路 + 332 行 Schema 约束，确保剧本质量和结构完整性
+> 💡 **核心设计**：五阶段 AI 生成链路 + 332 行 Schema 约束，把大模型输出纳入可校验、可编辑、可导出的工程流程。
 
 ### 系统架构图
 
@@ -168,7 +179,7 @@ flowchart TB
     API --> GENERATOR["⭐ 五阶段 AI 生成引擎<br/>章节分析 → 角色提取 → 场景规划<br/>→ 剧本生成 → 自动修复"]
     API --> VALIDATOR["✅ Schema 校验器<br/>332 行约束规则"]
     API --> PROJECT["💾 项目服务<br/>版本快照与恢复"]
-    API --> EXPORT["📦 导出服务<br/>YAML · JSON · Markdown"]
+    API --> EXPORT["📦 导出服务<br/>YAML · JSON · Markdown · PDF"]
     
     GENERATOR --> AI["🤖 AI 模型<br/>DeepSeek / OpenAI Compatible"]
     VALIDATOR --> SCHEMA["📐 JSON Schema<br/>Draft 2020-12"]
@@ -195,7 +206,7 @@ flowchart TB
 本架构图展示了 Novel2Script 的核心技术组件和数据流向：
 
 **核心创新**：
-- ⭐ **五阶段 AI 生成引擎**：创新的多阶段生成链路，确保角色一致性和场景连续性
+- ⭐ **五阶段 AI 生成引擎**：以章节、角色、场景、剧本和修复分层处理，降低单次生成带来的结构漂移
 - 📐 **332 行 Schema 约束**：严格的结构化输出规范，保证剧本质量
 - 💾 **版本快照系统**：类 Git 的版本管理，保护创作成果
 
@@ -205,7 +216,7 @@ flowchart TB
 3. 每个阶段输出结构化中间结果（可调试、可干预）
 4. Schema 校验器检查输出 → 失败则触发自动修复（最多 3 次）
 5. 用户编辑 → 项目服务保存快照到 SQLite
-6. 导出服务转换为 YAML/JSON/Markdown
+6. 导出服务转换为 YAML/JSON/Markdown/PDF
 
 详细的模块交互和完整架构见 [架构设计文档](docs/architecture-overview.md)。
 
@@ -285,7 +296,7 @@ Novel2Script/
 ### 🎨 技术创新点
 
 #### 1. 五阶段 AI 生成链路
-传统方案直接生成剧本，容易出现角色混乱、场景不连贯等问题。本项目创新性地采用**分阶段生成 + 中间结果校验**的方式：
+传统方案直接生成剧本，容易出现角色混乱、场景不连贯等问题。本项目采用**分阶段生成 + 中间结果校验**的方式：
 
 ```python
 # 伪代码示意
@@ -323,7 +334,7 @@ def generate_script_with_ai(title, genre, chapters):
 - **引用完整性**：场景的 `source_chapters` 必须引用有效章节 ID
 
 #### 3. Mock 模式设计
-创新的**双模式架构**（Mock/AI），解决了原型演示和真实生成的矛盾：
+项目提供**双模式架构**（Mock/AI），解决原型演示、测试联调和真实生成之间的矛盾：
 
 | 模式 | 使用场景 | 优势 |
 |------|---------|------|
@@ -419,7 +430,7 @@ def _trim_chapters_for_ai_prompt(chapters):
 ### 环境要求
 
 - **Python**：3.10+
-- **Node.js**：18+
+- **Node.js**：22（CI 使用 Node 22；本地建议保持一致）
 - **操作系统**：Windows 10/11、macOS、Linux
 
 ### 一键启动（推荐）
@@ -563,6 +574,9 @@ npm run build
 
 # Smoke Test（组件加载）
 npm run smoke
+
+# Playwright E2E（自动启动前后端）
+npm run e2e
 ```
 
 ### 端到端测试
@@ -582,7 +596,7 @@ bash scripts/smoke-test.sh
 4. ✅ YAML 校验
 5. ✅ 项目创建
 6. ✅ 版本创建
-7. ✅ 三种格式导出
+7. ✅ 多格式导出
 8. ✅ 前端页面可访问
 
 ---
@@ -611,7 +625,7 @@ bash scripts/smoke-test.sh
 ## 🎯 项目亮点总结
 
 ### 技术实现
-1. ✅ **五阶段 AI 生成链路**：业界首创的多阶段生成方案
+1. ✅ **五阶段 AI 生成链路**：面向小说改编的多阶段结构化生成方案
 2. ✅ **严格 Schema 约束**：332 行 JSON Schema 确保输出质量
 3. ✅ **自动修复机制**：YAML 校验失败自动迭代修复（最多 3 次）
 4. ✅ **双模式架构**：Mock/AI 模式无缝切换
@@ -621,8 +635,8 @@ bash scripts/smoke-test.sh
 1. ✅ **零学习成本**：拖拽上传、一键生成、可视化编辑
 2. ✅ **专业编辑器**：Monaco Editor + 实时校验
 3. ✅ **版本管理**：类 Git 的版本控制系统
-4. ✅ **多格式导出**：YAML/JSON/Markdown 满足不同需求
-5. ✅ **完整文档**：15+ 份技术文档（`docs/` 目录）
+4. ✅ **多格式导出**：YAML/JSON/Markdown/PDF 满足不同需求
+5. ✅ **核心文档**：需求、架构、AI 流程、Schema、对比报告等材料齐备
 
 ### 工程质量
 1. ✅ **类型安全**：Python Pydantic + TypeScript 全栈类型检查
@@ -642,11 +656,8 @@ bash scripts/smoke-test.sh
 - 🗂️ [项目结构说明](docs/project-structure.md)
 - 📐 [YAML Schema 设计](docs/yaml-schema.md)
 - 🤖 [AI 生成流程](docs/ai-generation.md)
-- 🧪 [测试报告](docs/testing-report.md)
-- 🚀 [部署指南](docs/deployment-final.md)
-- 🎬 [演示脚本](docs/demo-script.md)
-- ✅ [验收清单](docs/acceptance-checklist.md)
-- 📦 [最终交付报告](docs/final-delivery-report.md)
+- 📊 [对比实验报告](docs/comparison-report.md)
+- 📦 [最终优化报告](docs/final-report.md)
 
 ---
 
@@ -700,8 +711,6 @@ bash scripts/smoke-test.sh
 - 🔒 不要提交包含真实 API Key 的代码
 
 ---
-
-## 👥 团队信息
 
 ## 👥 团队信息
 
