@@ -12,6 +12,39 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-3178c6.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+<br>
+
+## 🚀 立即体验（在线 Demo）
+
+> **评审快速入口**：以下是项目已部署的在线服务，点击即可访问 👇
+
+<table align="center">
+  <tr>
+    <td align="center" width="300">
+      <a href="http://120.53.0.252/novel2/">
+        <strong>🎭 Novel2Script 工作台</strong><br>
+        <sub>http://120.53.0.252/novel2/</sub>
+      </a>
+    </td>
+    <td align="center" width="300">
+      <a href="http://120.53.0.252/novel2-api/health">
+        <strong>⚡ 后端 API 健康检查</strong><br>
+        <sub>http://120.53.0.252/novel2-api/health</sub>
+      </a>
+    </td>
+    <td align="center" width="300">
+      <a href="http://120.53.0.252/novel2-api/docs">
+        <strong>📋 API 文档（Swagger）</strong><br>
+        <sub>http://120.53.0.252/novel2-api/docs</sub>
+      </a>
+    </td>
+  </tr>
+</table>
+
+**快速上手**：打开工作台 → 上传 `examples/novel-sample-1.txt` → 点击"识别章节" → 点击"生成剧本" → 查看完整剧本输出 🎉
+
+<br>
+
 [功能演示](#-功能演示) • [快速开始](#-快速开始) • [技术架构](#-技术架构) • [项目结构](#-项目结构) • [核心特性](#-核心特性) • [Docker 部署](#-docker-部署)
 
 ---
@@ -469,15 +502,7 @@ bash scripts/start-dev.sh
 - 🔌 **后端 API**：http://127.0.0.1:8000
 - 📋 **API 文档**：http://127.0.0.1:8000/docs
 
-### 生产部署（Nginx 反向代理）
-
-通过 Nginx 统一 80 端口对外服务，与现有项目共存：
-
-| 服务 | 访问地址 |
-|------|---------|
-| 🌐 **前端工作台** | [http://120.53.0.252/novel2/](http://120.53.0.252/novel2/) |
-| 🔌 **后端 API** | [http://120.53.0.252/novel2-api/](http://120.53.0.252/novel2-api/) |
-| 📋 **API 文档** | [http://120.53.0.252/novel2-api/docs](http://120.53.0.252/novel2-api/docs) |
+> 💡 **在线 Demo 已部署**：顶部「立即体验」区域可直接访问已上线服务，无需本地搭建。
 
 ### 快速体验
 
