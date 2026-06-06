@@ -30,10 +30,8 @@ def call_ai_model(prompt: str, max_retries: int | None = None) -> str:
     """
     if not settings.enable_ai_generation:
         raise AIClientError("AI 生成未启用。请设置 ENABLE_AI_GENERATION=true 后再调用真实模型")
-
     if not settings.model_api_key:
         raise AIClientError("AI 模式已启用，但未配置 MODEL_API_KEY")
-
     if not settings.model_name:
         raise AIClientError("AI 模式已启用，但未配置 MODEL_NAME")
 
@@ -58,43 +56,72 @@ def call_ai_model(prompt: str, max_retries: int | None = None) -> str:
 
 
 def stream_ai_model(prompt: str) -> Iterator[str]:
-    """
-    调用 AI 模型并逐块返回生成内容。
-
-    流式接口只用于直接面向前端的长文本生成；分阶段 JSON 分析仍使用
-    call_ai_model，避免把中间结构暴露给用户。
-    """
+    """流式调用 AI 模型，逐块返回生成内容。"""
     if not settings.enable_ai_generation:
         raise AIClientError("AI 生成未启用。请设置 ENABLE_AI_GENERATION=true 后再调用真实模型")
-
     if not settings.model_api_key:
         raise AIClientError("AI 模式已启用，但未配置 MODEL_API_KEY")
-
     if not settings.model_name:
         raise AIClientError("AI 模式已启用，但未配置 MODEL_NAME")
 
     provider = settings.model_provider.lower().strip()
     if provider == "openai":
         yield from _stream_openai(prompt)
-        return
-    if provider == "anthropic":
+    elif provider == "anthropic":
         yield from _stream_anthropic(prompt)
-        return
-    raise AIClientError(f"不支持的 AI 提供商：{provider}")
+    else:
+        raise AIClientError(f"不支持的 AI 提供商：{provider}")
 
 
-def _call_openai(prompt: str) -> str:
+# ── OpenAI ────────────────────────────────────────────────────────────
+
+
+def _build_openai_client():
+    """延迟导入并构建 OpenAI 客户端。"""
     try:
-        from openai import APIConnectionError, APIError, APITimeoutError, AuthenticationError, OpenAI, RateLimitError
+        from openai import OpenAI
     except ImportError as exc:
         raise AIClientError("未安装 openai 包。请运行：pip install openai") from exc
-
-    client = OpenAI(
+    return OpenAI(
         api_key=settings.model_api_key,
         base_url=settings.model_base_url or None,
         timeout=settings.model_timeout,
     )
 
+
+def _translate_openai_error(exc: Exception) -> AIClientError:
+    """将 OpenAI SDK 异常映射为统一的 AIClientError。"""
+    from openai import APIConnectionError, APIError, APITimeoutError, AuthenticationError, RateLimitError
+
+    if isinstance(exc, AuthenticationError):
+        return AIClientError("OpenAI 兼容 API 认证失败，请检查 MODEL_API_KEY")
+    if isinstance(exc, APITimeoutError):
+        return AIClientError(f"OpenAI 兼容 API 调用超时（{settings.model_timeout}s）")
+    if isinstance(exc, RateLimitError):
+        return AIClientError("OpenAI 兼容 API 限流或额度不足（429）")
+    if isinstance(exc, APIConnectionError):
+        return AIClientError("OpenAI 兼容 API 连接失败，请检查 MODEL_BASE_URL 和网络")
+    if isinstance(exc, APIError):
+        status = getattr(exc, "status_code", "unknown")
+        prefix = "服务端错误" if status is not None and int(status) >= 500 else "调用失败"
+        return AIClientError(f"OpenAI 兼容 API {prefix}（{status}）")
+    return AIClientError(f"OpenAI 兼容 API 调用失败：{exc}")
+
+
+def _extract_openai_content(response) -> str:
+    """从 OpenAI 非流式响应中提取文本内容。"""
+    try:
+        content = response.choices[0].message.content
+    except (AttributeError, IndexError) as exc:
+        raise AIClientError("OpenAI 兼容 API 返回结构异常，未找到 choices[0].message.content") from exc
+    if not content or not content.strip():
+        raise AIClientError("OpenAI 兼容 API 返回内容为空")
+    return content.strip()
+
+
+def _call_openai(prompt: str) -> str:
+    """调用 OpenAI 兼容 API（非流式）。"""
+    client = _build_openai_client()
     try:
         response = client.chat.completions.create(
             model=settings.model_name,
@@ -102,43 +129,14 @@ def _call_openai(prompt: str) -> str:
             temperature=settings.model_temperature,
             max_tokens=settings.model_max_tokens,
         )
-    except AuthenticationError as exc:
-        raise AIClientError("OpenAI 兼容 API 认证失败，请检查 MODEL_API_KEY") from exc
-    except APITimeoutError as exc:
-        raise AIClientError(f"OpenAI 兼容 API 调用超时（{settings.model_timeout}s）") from exc
-    except RateLimitError as exc:
-        raise AIClientError("OpenAI 兼容 API 限流或额度不足（429）") from exc
-    except APIConnectionError as exc:
-        raise AIClientError("OpenAI 兼容 API 连接失败，请检查 MODEL_BASE_URL 和网络") from exc
-    except APIError as exc:
-        status_code = getattr(exc, "status_code", None)
-        if status_code and int(status_code) >= 500:
-            raise AIClientError(f"OpenAI 兼容 API 服务端错误（{status_code}）") from exc
-        raise AIClientError(f"OpenAI 兼容 API 调用失败（{status_code or 'unknown'}）") from exc
-
-    try:
-        content = response.choices[0].message.content
-    except (AttributeError, IndexError) as exc:
-        raise AIClientError("OpenAI 兼容 API 返回结构异常，未找到 choices[0].message.content") from exc
-
-    if not content or not content.strip():
-        raise AIClientError("OpenAI 兼容 API 返回内容为空")
-
-    return content.strip()
+    except Exception as exc:
+        raise _translate_openai_error(exc) from exc
+    return _extract_openai_content(response)
 
 
 def _stream_openai(prompt: str) -> Iterator[str]:
-    try:
-        from openai import APIConnectionError, APIError, APITimeoutError, AuthenticationError, OpenAI, RateLimitError
-    except ImportError as exc:
-        raise AIClientError("未安装 openai 包。请运行：pip install openai") from exc
-
-    client = OpenAI(
-        api_key=settings.model_api_key,
-        base_url=settings.model_base_url or None,
-        timeout=settings.model_timeout,
-    )
-
+    """调用 OpenAI 兼容 API（流式），逐 chunk 产出内容。"""
+    client = _build_openai_client()
     try:
         stream = client.chat.completions.create(
             model=settings.model_name,
@@ -147,7 +145,10 @@ def _stream_openai(prompt: str) -> Iterator[str]:
             max_tokens=settings.model_max_tokens,
             stream=True,
         )
+    except Exception as exc:
+        raise _translate_openai_error(exc) from exc
 
+    try:
         yielded = False
         for chunk in stream:
             try:
@@ -157,32 +158,65 @@ def _stream_openai(prompt: str) -> Iterator[str]:
             if content:
                 yielded = True
                 yield content
-
         if not yielded:
             raise AIClientError("OpenAI 兼容 API 返回内容为空")
-    except AuthenticationError as exc:
-        raise AIClientError("OpenAI 兼容 API 认证失败，请检查 MODEL_API_KEY") from exc
-    except APITimeoutError as exc:
-        raise AIClientError(f"OpenAI 兼容 API 调用超时（{settings.model_timeout}s）") from exc
-    except RateLimitError as exc:
-        raise AIClientError("OpenAI 兼容 API 限流或额度不足（429）") from exc
-    except APIConnectionError as exc:
-        raise AIClientError("OpenAI 兼容 API 连接失败，请检查 MODEL_BASE_URL 和网络") from exc
-    except APIError as exc:
-        status_code = getattr(exc, "status_code", None)
-        if status_code and int(status_code) >= 500:
-            raise AIClientError(f"OpenAI 兼容 API 服务端错误（{status_code}）") from exc
-        raise AIClientError(f"OpenAI 兼容 API 调用失败（{status_code or 'unknown'}）") from exc
+    except AIClientError:
+        raise
+    except Exception as exc:
+        raise _translate_openai_error(exc) from exc
 
 
-def _call_anthropic(prompt: str) -> str:
+# ── Anthropic ─────────────────────────────────────────────────────────
+
+
+def _build_anthropic_client():
+    """延迟导入并构建 Anthropic 客户端。"""
     try:
         import anthropic
     except ImportError as exc:
         raise AIClientError("未安装 anthropic 包。请运行：pip install anthropic") from exc
+    return anthropic.Anthropic(
+        api_key=settings.model_api_key,
+        timeout=settings.model_timeout,
+    )
 
-    client = anthropic.Anthropic(api_key=settings.model_api_key, timeout=settings.model_timeout)
 
+def _translate_anthropic_error(exc: Exception) -> AIClientError:
+    """将 Anthropic SDK 异常映射为统一的 AIClientError。"""
+    import anthropic
+
+    if isinstance(exc, anthropic.AuthenticationError):
+        return AIClientError("Anthropic API 认证失败，请检查 MODEL_API_KEY")
+    if isinstance(exc, anthropic.APITimeoutError):
+        return AIClientError(f"Anthropic API 调用超时（{settings.model_timeout}s）")
+    if isinstance(exc, anthropic.RateLimitError):
+        return AIClientError("Anthropic API 限流或额度不足（429）")
+    if isinstance(exc, anthropic.APIConnectionError):
+        return AIClientError("Anthropic API 连接失败，请检查网络")
+    if isinstance(exc, anthropic.APIStatusError):
+        status = getattr(exc, "status_code", None)
+        if status is not None and int(status) >= 500:
+            return AIClientError(f"Anthropic API 服务端错误（{status}）")
+        return AIClientError(f"Anthropic API 调用失败（{status or 'unknown'}）")
+    if isinstance(exc, anthropic.APIError):
+        return AIClientError("Anthropic API 调用失败")
+    return AIClientError(f"Anthropic API 调用失败：{exc}")
+
+
+def _extract_anthropic_content(response) -> str:
+    """从 Anthropic 非流式响应中提取文本内容。"""
+    try:
+        content = response.content[0].text
+    except (AttributeError, IndexError) as exc:
+        raise AIClientError("Anthropic API 返回结构异常，未找到 content[0].text") from exc
+    if not content or not content.strip():
+        raise AIClientError("Anthropic API 返回内容为空")
+    return content.strip()
+
+
+def _call_anthropic(prompt: str) -> str:
+    """调用 Anthropic API（非流式）。"""
+    client = _build_anthropic_client()
     try:
         response = client.messages.create(
             model=settings.model_name,
@@ -190,41 +224,16 @@ def _call_anthropic(prompt: str) -> str:
             temperature=settings.model_temperature,
             messages=[{"role": "user", "content": prompt}],
         )
-    except anthropic.AuthenticationError as exc:
-        raise AIClientError("Anthropic API 认证失败，请检查 MODEL_API_KEY") from exc
-    except anthropic.APITimeoutError as exc:
-        raise AIClientError(f"Anthropic API 调用超时（{settings.model_timeout}s）") from exc
-    except anthropic.RateLimitError as exc:
-        raise AIClientError("Anthropic API 限流或额度不足（429）") from exc
-    except anthropic.APIStatusError as exc:
-        status_code = getattr(exc, "status_code", None)
-        if status_code and int(status_code) >= 500:
-            raise AIClientError(f"Anthropic API 服务端错误（{status_code}）") from exc
-        raise AIClientError(f"Anthropic API 调用失败（{status_code or 'unknown'}）") from exc
-    except anthropic.APIError as exc:
-        raise AIClientError("Anthropic API 调用失败") from exc
-
-    try:
-        content = response.content[0].text
-    except (AttributeError, IndexError) as exc:
-        raise AIClientError("Anthropic API 返回结构异常，未找到 content[0].text") from exc
-
-    if not content or not content.strip():
-        raise AIClientError("Anthropic API 返回内容为空")
-
-    return content.strip()
+    except Exception as exc:
+        raise _translate_anthropic_error(exc) from exc
+    return _extract_anthropic_content(response)
 
 
 def _stream_anthropic(prompt: str) -> Iterator[str]:
+    """调用 Anthropic API（流式），逐 chunk 产出内容。"""
+    client = _build_anthropic_client()
+    yielded = False
     try:
-        import anthropic
-    except ImportError as exc:
-        raise AIClientError("未安装 anthropic 包。请运行：pip install anthropic") from exc
-
-    client = anthropic.Anthropic(api_key=settings.model_api_key, timeout=settings.model_timeout)
-
-    try:
-        yielded = False
         with client.messages.stream(
             model=settings.model_name,
             max_tokens=settings.model_max_tokens,
@@ -235,30 +244,29 @@ def _stream_anthropic(prompt: str) -> Iterator[str]:
                 if content:
                     yielded = True
                     yield content
-
         if not yielded:
             raise AIClientError("Anthropic API 返回内容为空")
-    except anthropic.AuthenticationError as exc:
-        raise AIClientError("Anthropic API 认证失败，请检查 MODEL_API_KEY") from exc
-    except anthropic.APITimeoutError as exc:
-        raise AIClientError(f"Anthropic API 调用超时（{settings.model_timeout}s）") from exc
-    except anthropic.RateLimitError as exc:
-        raise AIClientError("Anthropic API 限流或额度不足（429）") from exc
-    except anthropic.APIStatusError as exc:
-        status_code = getattr(exc, "status_code", None)
-        if status_code and int(status_code) >= 500:
-            raise AIClientError(f"Anthropic API 服务端错误（{status_code}）") from exc
-        raise AIClientError(f"Anthropic API 调用失败（{status_code or 'unknown'}）") from exc
-    except anthropic.APIError as exc:
-        raise AIClientError("Anthropic API 调用失败") from exc
+    except AIClientError:
+        raise
+    except Exception as exc:
+        raise _translate_anthropic_error(exc) from exc
+
+
+# ── 通用工具 ──────────────────────────────────────────────────────────
 
 
 def parse_json_response(text: str, stage_name: str = "AI 阶段") -> Any:
     """
-    从 AI 响应中解析 JSON，支持直接 JSON 和 Markdown 代码块。
+    从 AI 响应中解析 JSON，支持直接 JSON 和 Markdown 代码块包裹。
+
+    Args:
+        text: AI 返回的原始文本。
+        stage_name: 阶段名称，用于错误信息。
+
+    Returns:
+        解析后的 Python 对象（通常是 dict 或 list）。
     """
     candidate = _extract_code_block(text, "json") or _extract_code_block(text, None) or text.strip()
-
     try:
         return json.loads(candidate)
     except json.JSONDecodeError as exc:
@@ -267,6 +275,7 @@ def parse_json_response(text: str, stage_name: str = "AI 阶段") -> Any:
 
 
 def _extract_code_block(text: str, language: str | None) -> str | None:
+    """从 Markdown 文本中提取代码块内容。"""
     lower_text = text.lower()
     if language:
         marker = f"```{language}"
@@ -294,13 +303,13 @@ def _extract_code_block(text: str, language: str | None) -> str | None:
 
 
 def _response_snippet(text: str, limit: int = 300) -> str:
+    """截取响应前 N 字符用于错误信息（将空白压缩为单空格）。"""
     compact = " ".join(text.strip().split())
-    if len(compact) <= limit:
-        return compact
-    return compact[:limit] + "..."
+    return compact[:limit] + "..." if len(compact) > limit else compact
 
 
 def _should_retry_error(error: AIClientError) -> bool:
+    """判断一个 AIClientError 是否值得重试。"""
     message = str(error)
     retry_markers = ["超时", "限流", "429", "服务端错误", "连接失败"]
     return any(marker in message for marker in retry_markers)

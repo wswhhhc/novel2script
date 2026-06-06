@@ -33,6 +33,13 @@ class Settings:
     model_timeout: int = int(os.getenv("MODEL_TIMEOUT", "120"))
     model_max_retries: int = int(os.getenv("MODEL_MAX_RETRIES", "2"))
 
+    # CORS 配置
+    cors_origins: list[str] = [
+        origin.strip()
+        for origin in os.getenv("CORS_ORIGINS", "http://127.0.0.1:5173,http://localhost:5173,http://127.0.0.1:15173").split(",")
+        if origin.strip()
+    ]
+
     # 生成配置
     enable_ai_generation: bool = os.getenv("ENABLE_AI_GENERATION", "false").lower() == "true"
     enable_generation_cache: bool = os.getenv("ENABLE_GENERATION_CACHE", "true").lower() == "true"

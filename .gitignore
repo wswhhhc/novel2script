@@ -26,3 +26,9 @@ output/playwright/
 .DS_Store
 Thumbs.db
 .gitconfig
+
+# Virtual environment
+venv/
+
+# Claude Code
+.claude/
