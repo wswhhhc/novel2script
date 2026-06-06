@@ -590,6 +590,7 @@ function App() {
             title={title}
             yamlText={yamlText}
             validation={validation}
+            generating={generating}
             validating={validating}
             onYamlChange={handleYamlChange}
             onValidate={handleValidate}

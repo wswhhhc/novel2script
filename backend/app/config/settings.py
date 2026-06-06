@@ -35,6 +35,8 @@ class Settings:
 
     # 生成配置
     enable_ai_generation: bool = os.getenv("ENABLE_AI_GENERATION", "false").lower() == "true"
+    enable_generation_cache: bool = os.getenv("ENABLE_GENERATION_CACHE", "true").lower() == "true"
+    generation_cache_dir: Path = Path(os.getenv("GENERATION_CACHE_DIR", backend_root / "data" / "generation_cache"))
     auto_fix_attempts: int = int(os.getenv("AUTO_FIX_ATTEMPTS", "3"))
 
 

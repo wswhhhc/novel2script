@@ -18,6 +18,7 @@ describe("YamlEditor", () => {
     title: "测试剧本",
     yamlText: "script:\n  title: 测试",
     validation: null,
+    generating: false,
     validating: false,
     onYamlChange: mockOnYamlChange,
     onValidate: mockOnValidate,
@@ -72,6 +73,12 @@ describe("YamlEditor", () => {
   it("shows validating state", () => {
     render(<YamlEditor {...defaultProps} validating={true} />);
     expect(screen.getByText("校验中")).toBeInTheDocument();
+  });
+
+  it("suppresses local syntax errors while generating", () => {
+    render(<YamlEditor {...defaultProps} yamlText={'script:\n  title: "未完成'} generating={true} />);
+    expect(screen.getAllByText("生成中").length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText("本地语法检查失败")).not.toBeInTheDocument();
   });
 
   it("displays validation success", () => {

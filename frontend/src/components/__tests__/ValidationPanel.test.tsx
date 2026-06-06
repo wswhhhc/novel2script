@@ -4,23 +4,32 @@ import { ValidationPanel } from "../ValidationPanel";
 
 describe("ValidationPanel", () => {
   it("shows waiting state when validation is null", () => {
-    render(<ValidationPanel validation={null} localSyntaxError={null} />);
+    render(<ValidationPanel validation={null} localSyntaxError={null} generating={false} />);
     expect(screen.getByText("等待校验")).toBeInTheDocument();
   });
 
   it("displays success state when validation passes", () => {
     const validation = { valid: true, errors: [] };
-    render(<ValidationPanel validation={validation} localSyntaxError={null} />);
+    render(<ValidationPanel validation={validation} localSyntaxError={null} generating={false} />);
 
     expect(screen.getByText("Schema 校验通过")).toBeInTheDocument();
     expect(screen.getByText(/符合后端校验规则/i)).toBeInTheDocument();
   });
 
   it("displays local syntax error", () => {
-    render(<ValidationPanel validation={null} localSyntaxError="YAML 语法错误：缺少冒号" />);
+    render(<ValidationPanel validation={null} localSyntaxError="YAML 语法错误：缺少冒号" generating={false} />);
 
     expect(screen.getByText(/语法错误/i)).toBeInTheDocument();
     expect(screen.getByText(/缺少冒号/i)).toBeInTheDocument();
+  });
+
+  it("shows generating state before validation or syntax errors", () => {
+    const validation = { valid: false, errors: ["Schema 错误"] };
+    render(<ValidationPanel validation={validation} localSyntaxError="语法错误" generating={true} />);
+
+    expect(screen.getByText("生成中")).toBeInTheDocument();
+    expect(screen.queryByText(/语法错误/i)).not.toBeInTheDocument();
+    expect(screen.queryByText("Schema 校验失败")).not.toBeInTheDocument();
   });
 
   it("displays schema validation errors", () => {
@@ -32,7 +41,7 @@ describe("ValidationPanel", () => {
         "script.scenes[0].beats[0]: dialogue 类型必须包含 character 字段",
       ],
     };
-    render(<ValidationPanel validation={validation} localSyntaxError={null} />);
+    render(<ValidationPanel validation={validation} localSyntaxError={null} generating={false} />);
 
     expect(screen.getByText("Schema 校验失败")).toBeInTheDocument();
     expect(screen.getByText(/必填字段/i)).toBeInTheDocument();
@@ -45,14 +54,14 @@ describe("ValidationPanel", () => {
       valid: false,
       errors: ["错误1", "错误2", "错误3", "错误4", "错误5"],
     };
-    render(<ValidationPanel validation={validation} localSyntaxError={null} />);
+    render(<ValidationPanel validation={validation} localSyntaxError={null} generating={false} />);
 
     expect(screen.getByText("Schema 校验失败")).toBeInTheDocument();
   });
 
   it("prioritizes local syntax error over schema errors", () => {
     const validation = { valid: false, errors: ["Schema 错误"] };
-    render(<ValidationPanel validation={validation} localSyntaxError="语法错误" />);
+    render(<ValidationPanel validation={validation} localSyntaxError="语法错误" generating={false} />);
 
     // Should show syntax error first
     expect(screen.getByText(/语法错误/i)).toBeInTheDocument();
@@ -63,7 +72,7 @@ describe("ValidationPanel", () => {
       valid: false,
       errors: ["错误A", "错误B", "错误C"],
     };
-    const { container } = render(<ValidationPanel validation={validation} localSyntaxError={null} />);
+    const { container } = render(<ValidationPanel validation={validation} localSyntaxError={null} generating={false} />);
 
     const errorItems = container.querySelectorAll("li");
     expect(errorItems.length).toBeGreaterThanOrEqual(3);

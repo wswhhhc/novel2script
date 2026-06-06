@@ -10,14 +10,23 @@ interface YamlEditorProps {
   title: string;
   yamlText: string;
   validation: ValidationResponse | null;
+  generating: boolean;
   validating: boolean;
   onYamlChange: (value: string) => void;
   onValidate: () => void;
 }
 
-export function YamlEditor({ title, yamlText, validation, validating, onYamlChange, onValidate }: YamlEditorProps) {
+export function YamlEditor({
+  title,
+  yamlText,
+  validation,
+  generating,
+  validating,
+  onYamlChange,
+  onValidate,
+}: YamlEditorProps) {
   const [copyState, setCopyState] = useState("复制");
-  const localSyntaxError = useMemo(() => getYamlSyntaxError(yamlText), [yamlText]);
+  const localSyntaxError = useMemo(() => (generating ? null : getYamlSyntaxError(yamlText)), [generating, yamlText]);
   const hasYaml = yamlText.trim().length > 0;
 
   async function handleCopy() {
@@ -71,12 +80,12 @@ export function YamlEditor({ title, yamlText, validation, validating, onYamlChan
             type="button"
             className="icon-button strong"
             onClick={onValidate}
-            disabled={!hasYaml || validating}
+            disabled={!hasYaml || generating || validating}
             title="重新校验"
             aria-label="重新校验 YAML"
           >
             {validating ? <span className="spinner" /> : <RotateCw className="h-4 w-4" aria-hidden="true" />}
-            <span>{validating ? "校验中" : "校验"}</span>
+            <span>{generating ? "生成中" : validating ? "校验中" : "校验"}</span>
           </button>
         </div>
       </div>
@@ -102,7 +111,7 @@ export function YamlEditor({ title, yamlText, validation, validating, onYamlChan
         />
       </div>
 
-      <ValidationPanel validation={validation} localSyntaxError={localSyntaxError} />
+      <ValidationPanel validation={validation} localSyntaxError={localSyntaxError} generating={generating} />
     </section>
   );
 }

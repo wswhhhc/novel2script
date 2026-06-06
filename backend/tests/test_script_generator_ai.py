@@ -108,3 +108,21 @@ def test_generate_script_with_ai_returns_invalid_when_fix_fails(monkeypatch):
     assert "缺少必填字段" in result.yaml
     assert len(prompts) == 7
     assert result.validation.errors
+
+
+def test_generation_stage_cache_reuses_structured_results(monkeypatch, tmp_path):
+    calls: list[str] = []
+
+    def fake_call_ai_model(prompt: str) -> str:
+        calls.append(prompt)
+        return _json_response({"chapters_analysis": [{"chapter_id": "C001", "summary": "摘要"}]})
+
+    monkeypatch.setattr(settings, "enable_generation_cache", True)
+    monkeypatch.setattr(settings, "generation_cache_dir", tmp_path)
+    monkeypatch.setattr(script_generator, "call_ai_model", fake_call_ai_model)
+
+    first = script_generator._stage_1_analyze_chapters("测试小说", "悬疑", "[C001] 正文")
+    second = script_generator._stage_1_analyze_chapters("测试小说", "悬疑", "[C001] 正文")
+
+    assert first == second
+    assert len(calls) == 1

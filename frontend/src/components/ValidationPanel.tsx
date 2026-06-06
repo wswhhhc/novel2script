@@ -4,9 +4,22 @@ import type { ValidationResponse } from "../api/types";
 interface ValidationPanelProps {
   validation: ValidationResponse | null;
   localSyntaxError: string | null;
+  generating: boolean;
 }
 
-export function ValidationPanel({ validation, localSyntaxError }: ValidationPanelProps) {
+export function ValidationPanel({ validation, localSyntaxError, generating }: ValidationPanelProps) {
+  if (generating) {
+    return (
+      <div className="validation-panel neutral">
+        <div className="validation-title">
+          <ShieldAlert className="h-4 w-4" aria-hidden="true" />
+          <strong>生成中</strong>
+        </div>
+        <p>流式输出中，完成后自动校验。</p>
+      </div>
+    );
+  }
+
   if (localSyntaxError) {
     return (
       <div className="validation-panel invalid">

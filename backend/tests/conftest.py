@@ -11,6 +11,7 @@ if str(BACKEND_ROOT) not in sys.path:
 
 os.environ.setdefault("NOVEL2SCRIPT_DB_PATH", str(BACKEND_ROOT / ".pytest_cache" / "novel2script-test.db"))
 os.environ["ENABLE_AI_GENERATION"] = "false"
+os.environ["ENABLE_GENERATION_CACHE"] = "false"
 os.environ["MODEL_API_KEY"] = ""
 os.environ["MODEL_NAME"] = ""
 

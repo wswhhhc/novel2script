@@ -13,6 +13,7 @@ from app.config.settings import settings
 from app.schemas.requests import ChapterInput
 from app.schemas.responses import GenerateScriptResponse
 from app.services.ai_client import AIClientError, call_ai_model, parse_json_response, stream_ai_model
+from app.services.generation_cache import get_cached_stage, set_cached_stage
 from app.services.prompt_loader import format_chapters_for_prompt, load_prompt_template
 from app.services.script_validator import validate_script_yaml
 
@@ -233,8 +234,7 @@ def _stage_1_analyze_chapters(title: str, genre: str, chapters_text: str) -> dic
         chapters=chapters_text,
     )
 
-    response = call_ai_model(prompt)
-    return parse_json_response(response, stage_name="阶段 1 章节分析")
+    return _call_cached_json_stage("chapter_analysis", prompt, stage_name="阶段 1 章节分析")
 
 
 def _stage_2_extract_characters(title: str, genre: str, chapters_analysis: dict) -> dict:
@@ -249,8 +249,7 @@ def _stage_2_extract_characters(title: str, genre: str, chapters_analysis: dict)
         chapters_analysis=chapters_analysis,
     )
 
-    response = call_ai_model(prompt)
-    return parse_json_response(response, stage_name="阶段 2 角色提取")
+    return _call_cached_json_stage("character_extraction", prompt, stage_name="阶段 2 角色提取")
 
 
 def _stage_3_plan_scenes(title: str, genre: str, chapters_analysis: dict, characters: dict) -> dict:
@@ -266,8 +265,19 @@ def _stage_3_plan_scenes(title: str, genre: str, chapters_analysis: dict, charac
         characters=characters,
     )
 
+    return _call_cached_json_stage("scene_planning", prompt, stage_name="阶段 3 场景规划")
+
+
+def _call_cached_json_stage(cache_stage: str, prompt: str, stage_name: str) -> dict:
+    cached = get_cached_stage(cache_stage, prompt)
+    if cached is not None:
+        return cached
+
     response = call_ai_model(prompt)
-    return parse_json_response(response, stage_name="阶段 3 场景规划")
+    payload = parse_json_response(response, stage_name=stage_name)
+    if isinstance(payload, dict):
+        set_cached_stage(cache_stage, prompt, payload)
+    return payload
 
 
 def _stage_4_generate_script(
