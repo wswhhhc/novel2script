@@ -42,6 +42,8 @@
   </tr>
 </table>
 
+> 💡 点击以上链接会在当前页跳转，按住 **Ctrl**（Mac：**Cmd**）点击可在新标签页打开。
+
 ### 建议评审路径
 
 | 步骤 | 操作 | 可验证结果 |
@@ -62,7 +64,7 @@
 
 **完整功能演示（4分钟）**：
 
-[![Novel2Script 演示视频](https://img.shields.io/badge/B站-观看演示视频-00A1D6?logo=bilibili&logoColor=white)](https://www.bilibili.com/video/BV1F37C6iE4v)
+[![Novel2Script 演示视频 ↗](https://img.shields.io/badge/B站-观看演示视频-00A1D6?logo=bilibili&logoColor=white)](https://www.bilibili.com/video/BV1F37C6iE4v)
 
 视频展示从小说上传到剧本导出的完整流程，包括智能章节识别、五阶段AI生成、YAML编辑、版本管理和多格式导出等核心功能。
 
