@@ -1,10 +1,15 @@
 import Editor from "@monaco-editor/react";
 import { Clipboard, Download, RotateCw } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ValidationResponse } from "../api/types";
 import { buildYamlFileName, downloadTextFile } from "../utils/download";
 import { getYamlSyntaxError } from "../utils/yaml";
 import { ValidationPanel } from "./ValidationPanel";
+
+/** 从 HTML 根元素读取当前主题。 */
+function monacoTheme() {
+  return document.documentElement.dataset.theme === "dark" ? "vs-dark" : "vs";
+}
 
 interface YamlEditorProps {
   title: string;
@@ -26,8 +31,16 @@ export function YamlEditor({
   onValidate,
 }: YamlEditorProps) {
   const [copyState, setCopyState] = useState("复制");
+  const [editorTheme, setEditorTheme] = useState(monacoTheme);
   const localSyntaxError = useMemo(() => (generating ? null : getYamlSyntaxError(yamlText)), [generating, yamlText]);
   const hasYaml = yamlText.trim().length > 0;
+
+  // 响应 data-theme 属性变化，切换 Monaco 主题
+  useEffect(() => {
+    const observer = new MutationObserver(() => setEditorTheme(monacoTheme()));
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
+  }, []);
 
   async function handleCopy() {
     if (!hasYaml) {
@@ -94,7 +107,7 @@ export function YamlEditor({
         <Editor
           height="100%"
           language="yaml"
-          theme="vs"
+          theme={editorTheme}
           value={yamlText}
           loading={<div className="editor-loading">编辑器加载中...</div>}
           options={{
