@@ -60,13 +60,7 @@ export function WorkspaceDialog({ open, onConfirm }: WorkspaceDialogProps) {
         }
       }}
     >
-      <form
-        className="modal-panel"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={headingId}
-        onSubmit={handleSubmit}
-      >
+      <form className="modal-panel" role="dialog" aria-modal="true" aria-labelledby={headingId} onSubmit={handleSubmit}>
         <div className="panel-head">
           <div>
             <p className="panel-kicker">欢迎使用 Novel2Script</p>
@@ -91,9 +85,7 @@ export function WorkspaceDialog({ open, onConfirm }: WorkspaceDialogProps) {
           />
         </label>
 
-        {error && (
-          <p style={{ color: "#b9472f", fontSize: "0.8rem", margin: "4px 0 0" }}>{error}</p>
-        )}
+        {error && <p style={{ color: "#b9472f", fontSize: "0.8rem", margin: "4px 0 0" }}>{error}</p>}
 
         <div className="modal-actions" style={{ marginTop: "16px" }}>
           <button type="submit" className="primary-button" disabled={!name.trim()}>

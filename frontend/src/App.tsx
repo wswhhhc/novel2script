@@ -213,10 +213,7 @@ function App() {
         onSubmit={projects.handleSaveDialogSubmit}
       />
 
-      <WorkspaceDialog
-        open={showWorkspaceDialog}
-        onConfirm={handleWorkspaceConfirm}
-      />
+      <WorkspaceDialog open={showWorkspaceDialog} onConfirm={handleWorkspaceConfirm} />
     </div>
   );
 }
