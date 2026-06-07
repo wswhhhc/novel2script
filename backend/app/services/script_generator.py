@@ -182,14 +182,10 @@ def _validate_input(title: str, genre: str, chapters: list[ChapterInput]) -> Non
         raise ValidationError("小说标题不能为空")
 
     if len(chapters) < settings.min_chapters:
-        raise ValidationError(
-            f"章节数量不足，需要至少 {settings.min_chapters} 个章节，当前收到 {len(chapters)} 个章节"
-        )
+        raise ValidationError(f"章节数量不足，需要至少 {settings.min_chapters} 个章节，当前收到 {len(chapters)} 个章节")
 
     if len(chapters) > settings.max_chapters:
-        raise ValidationError(
-            f"章节数量过多，最多支持 {settings.max_chapters} 个章节，当前收到 {len(chapters)} 个章节"
-        )
+        raise ValidationError(f"章节数量过多，最多支持 {settings.max_chapters} 个章节，当前收到 {len(chapters)} 个章节")
 
     total_content_length = sum(len(chapter.content) for chapter in chapters)
     if total_content_length > settings.max_input_length:
@@ -199,9 +195,7 @@ def _validate_input(title: str, genre: str, chapters: list[ChapterInput]) -> Non
 
     for index, chapter in enumerate(chapters, start=1):
         if not CHAPTER_ID_RE.fullmatch(chapter.id):
-            raise ValidationError(
-                f"第 {index} 个章节 ID 格式错误：{chapter.id}，应为 C001-C999"
-            )
+            raise ValidationError(f"第 {index} 个章节 ID 格式错误：{chapter.id}，应为 C001-C999")
 
 
 def _stage_1_analyze_chapters(title: str, genre: str, chapters_text: str) -> dict:
