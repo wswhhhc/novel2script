@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlite3 import Row
 
 from app.db.database import get_connection
-from app.exceptions import NotFoundError, ValidationError
+from app.exceptions import NotFoundError
 from app.schemas.projects import (
     ProjectCreateRequest,
     ProjectDetailResponse,

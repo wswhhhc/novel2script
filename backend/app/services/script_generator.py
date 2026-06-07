@@ -170,8 +170,8 @@ def generate_script_stream_events(title: str, genre: str, chapters: list[Chapter
 
     except AIClientError as exc:
         yield _stream_event("error", message=f"AI 服务调用失败：{str(exc)}")
-    except HTTPException as exc:
-        yield _stream_event("error", message=str(exc.detail))
+    except (ValidationError, ServiceError) as exc:
+        yield _stream_event("error", message=str(exc))
     except Exception as exc:
         yield _stream_event("error", message=f"剧本生成过程出错：{str(exc)}")
 
