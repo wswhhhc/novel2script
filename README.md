@@ -48,11 +48,12 @@
 
 | 步骤 | 操作 | 可验证结果 |
 |------|------|------------|
-| 1 | 打开 Novel2Script 工作台 | 前端页面正常加载 |
-| 2 | 上传 `examples/novel-sample-1.txt` | 自动填充小说内容 |
-| 3 | 点击「识别章节」 | 识别出章节列表 |
-| 4 | 点击「生成剧本」 | 生成结构化 YAML 剧本 |
-| 5 | 保存项目并导出 | 验证版本管理和多格式导出 |
+| 1 | 打开 Novel2Script 工作台 | 弹窗提示「进入工作区」 |
+| 2 | 输入工作区名称进入（如 `demo`） | 数据与其他工作区隔离 |
+| 3 | 上传 `examples/novel-sample-1.txt` | 自动填充小说内容 |
+| 4 | 点击「识别章节」 | 识别出章节列表 |
+| 5 | 点击「生成剧本」 | 生成结构化 YAML 剧本 |
+| 6 | 保存项目并导出 | 验证版本管理和多格式导出 |
 
 <br>
 
@@ -277,6 +278,7 @@ Novel2Script/
 │   │   ├── schemas/         # Pydantic 请求/响应/项目模型
 │   │   ├── db/              # SQLite 初始化与数据访问
 │   │   └── config/          # 环境变量与运行配置
+    │   │   ├── dependencies.py  # 工作区隔离等依赖注入
 │   ├── tests/               # 后端单元测试与接口测试
 │   └── data/                # 本地数据库目录，运行时生成
 │
@@ -284,7 +286,7 @@ Novel2Script/
 │   ├── src/
 │   │   ├── components/      # 输入、章节、生成、编辑器、校验、项目、导出等 UI
 │   │   ├── api/             # 后端 API 客户端与类型定义
-│   │   └── utils/           # YAML、下载、格式化等浏览器端工具
+│   │   ├── utils/           # YAML、下载、工作区、格式化等浏览器端工具
 │   └── scripts/             # 前端 smoke test
 │
 ├── prompts/                 # 五阶段 AI Prompt 模板
@@ -387,7 +389,31 @@ def generate_script_with_ai(title, genre, chapters):
 
 环境变量一键切换：`ENABLE_AI_GENERATION=true/false`
 
-#### 4. 长章节智能裁剪
+#### 4. 工作区隔离
+
+无需注册登录，通过**工作区名称**即可实现多用户数据隔离：
+
+- 🔑 首次访问弹窗输入工作区名，存储在浏览器
+- 🧱 所有 API 请求自动携带 `X-Workspace` 请求头
+- 🗂️ 后端按工作区过滤数据库查询，互不可见
+- 🔄 顶部标识当前工作区，可随时切换
+- 🔒 不暴露工作区列表，防止扫描
+
+```python
+# backend/app/dependencies.py — 一行依赖注入实现隔离
+async def get_workspace(x_workspace: str = Header(default="default")):
+    return x_workspace.strip()
+```
+
+```typescript
+// frontend/src/api/client.ts — 自动携带工作区头
+function workspaceHeaders() {
+  const ws = getWorkspace();
+  return ws ? { "X-Workspace": ws } : {};
+}
+```
+
+#### 5. 长章节智能裁剪
 单章节超过 8000 字时，自动取首尾各 4000 字，避免超出 AI 上下文限制：
 
 ```python
@@ -676,6 +702,7 @@ bash scripts/smoke-test.sh
 3. ✅ **自动修复机制**：YAML 校验失败自动迭代修复（最多 3 次）
 4. ✅ **双模式架构**：Mock/AI 模式无缝切换
 5. ✅ **长文本优化**：智能裁剪避免 token 超限
+6. ✅ **工作区隔离**：无需注册登录，X-Workspace 请求头实现多租户数据隔离
 
 ### 用户体验
 1. ✅ **零学习成本**：拖拽上传、一键生成、可视化编辑
@@ -721,6 +748,7 @@ bash scripts/smoke-test.sh
 - [ ] 分镜脚本生成
 
 ### 长期愿景
+- [x] 工作区隔离（多租户数据隔离）
 - [ ] 云端协作（多人实时编辑）
 - [ ] AI 导演建议（镜头、配乐）
 - [ ] 自动生成分镜图
