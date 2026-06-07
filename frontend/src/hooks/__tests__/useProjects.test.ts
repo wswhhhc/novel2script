@@ -38,9 +38,7 @@ const mockProject = {
   genre: "悬疑",
   chapter_count: 3,
   source_content: "正文内容",
-  chapters: [
-    { id: "C001", title: "第一章", content: "内容", word_count: 100 },
-  ],
+  chapters: [{ id: "C001", title: "第一章", content: "内容", word_count: 100 }],
   current_yaml: "script:\n  title: 测试",
   validation: { valid: true, errors: [] },
   generation_mode: "mock" as const,
@@ -95,9 +93,7 @@ describe("useProjects", () => {
 
     expect(client.getProject).toHaveBeenCalledWith(1);
     expect(bridge.applyProject).toHaveBeenCalledWith(mockProject);
-    expect(bridge.setStatus).toHaveBeenCalledWith(
-      expect.objectContaining({ tone: "success" })
-    );
+    expect(bridge.setStatus).toHaveBeenCalledWith(expect.objectContaining({ tone: "success" }));
   });
 
   it("handleOpenProject shows error on failure", async () => {
@@ -110,9 +106,7 @@ describe("useProjects", () => {
       await result.current.handleOpenProject(999);
     });
 
-    expect(bridge.setStatus).toHaveBeenCalledWith(
-      expect.objectContaining({ tone: "error" })
-    );
+    expect(bridge.setStatus).toHaveBeenCalledWith(expect.objectContaining({ tone: "error" }));
   });
 
   it("handleDeleteProject removes project", async () => {

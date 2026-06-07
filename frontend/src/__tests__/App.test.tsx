@@ -43,9 +43,7 @@ describe("App", () => {
   it("shows initial status message", () => {
     render(<App />);
 
-    expect(
-      screen.getByText("粘贴小说正文或上传文件后开始识别章节。")
-    ).toBeInTheDocument();
+    expect(screen.getByText("粘贴小说正文或上传文件后开始识别章节。")).toBeInTheDocument();
   });
 
   it("renders all 3 column layout", () => {
@@ -59,9 +57,7 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    const textarea = screen.getByPlaceholderText(
-      /粘贴包含至少 3 个章节的小说文本/i
-    );
+    const textarea = screen.getByPlaceholderText(/粘贴包含至少 3 个章节的小说文本/i);
     await user.type(textarea, "测试小说正文内容");
 
     // After typing, content metrics should be visible
