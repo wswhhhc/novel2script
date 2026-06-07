@@ -1,15 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  generateScriptStream,
-  getGenerationMode,
-  parseChapters,
-  validateYaml,
-} from "../api/client";
-import type {
-  GenerationModeResponse,
-  ParseChaptersResponse,
-  ValidationResponse,
-} from "../api/types";
+import { generateScriptStream, getGenerationMode, parseChapters, validateYaml } from "../api/client";
+import type { GenerationModeResponse, ParseChaptersResponse, ValidationResponse } from "../api/types";
 
 export interface WorkspaceState {
   title: string;
@@ -56,7 +47,7 @@ export interface WorkspaceActions {
   setStatus: (status: { tone: "info" | "success" | "warning" | "error"; message: string }) => void;
 }
 
-export function useWorkspace(): WorkspaceState & WorkspaceActions & { status: { tone: string; message: string }; setStatus: (s: { tone: string; message: string }) => void } {
+export function useWorkspace() {
   const [title, setTitle] = useState("");
   const [genre, setGenre] = useState("悬疑");
   const [content, setContent] = useState("");
@@ -87,9 +78,15 @@ export function useWorkspace(): WorkspaceState & WorkspaceActions & { status: { 
   useEffect(() => {
     let mounted = true;
     getGenerationMode()
-      .then((mode) => { if (mounted) setGenerationMode(mode); })
-      .catch(() => { if (mounted) setGenerationMode(null); });
-    return () => { mounted = false; };
+      .then((mode) => {
+        if (mounted) setGenerationMode(mode);
+      })
+      .catch(() => {
+        if (mounted) setGenerationMode(null);
+      });
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   async function handleParse() {
@@ -160,7 +157,9 @@ export function useWorkspace(): WorkspaceState & WorkspaceActions & { status: { 
           setGenerationMessage(event.message ?? "剧本生成完成。");
           setStatus({
             tone: event.validation.valid ? "success" : "warning",
-            message: event.message ?? (event.validation.valid ? "剧本生成成功，Schema 校验通过。" : "剧本生成成功，但 Schema 校验有错误。"),
+            message:
+              event.message ??
+              (event.validation.valid ? "剧本生成成功，Schema 校验通过。" : "剧本生成成功，但 Schema 校验有错误。"),
           });
           return;
         }
@@ -248,14 +247,34 @@ export function useWorkspace(): WorkspaceState & WorkspaceActions & { status: { 
   }
 
   return {
-    title, genre, content, parseResult, yamlText, validation, dirty,
-    canParse, canGenerate, hasYaml, totalWords,
-    parsing, generating, generationProgress, generationMessage, validating,
+    title,
+    genre,
+    content,
+    parseResult,
+    yamlText,
+    validation,
+    dirty,
+    canParse,
+    canGenerate,
+    hasYaml,
+    totalWords,
+    parsing,
+    generating,
+    generationProgress,
+    generationMessage,
+    validating,
     generationMode,
-    status, setStatus,
-    handleParse, handleGenerate, handleValidate,
-    handleFileLoaded, handleTitleChange, handleGenreChange, handleContentChange,
-    handleYamlChange, handleClear,
+    status,
+    setStatus,
+    handleParse,
+    handleGenerate,
+    handleValidate,
+    handleFileLoaded,
+    handleTitleChange,
+    handleGenreChange,
+    handleContentChange,
+    handleYamlChange,
+    handleClear,
     _internal: { setTitle, setGenre, setContent, setParseResult, setYamlText, setValidation, setDirty, setStatus },
   } as WorkspaceActions & WorkspaceState & { _internal: WorkspaceInternal };
 }

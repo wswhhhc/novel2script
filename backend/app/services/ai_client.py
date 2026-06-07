@@ -21,25 +21,30 @@ class AIClientError(Exception):
 class ErrorCategory(Enum):
     """AI 调用错误分类，用于决定是否重试。"""
 
-    AUTH = "auth"                # 认证失败 — 不应重试
-    TIMEOUT = "timeout"          # 超时 — 可重试
-    RATE_LIMIT = "rate_limit"    # 限流 — 可重试
-    CONNECTION = "connection"    # 连接失败 — 可重试
-    SERVER = "server"            # 服务端错误 — 可重试
-    EMPTY = "empty"              # 返回为空 — 不应重试
-    PARSE = "parse"              # 结构异常 — 不应重试
-    UNKNOWN = "unknown"          # 未知错误 — 可重试
+    AUTH = "auth"  # 认证失败 — 不应重试
+    TIMEOUT = "timeout"  # 超时 — 可重试
+    RATE_LIMIT = "rate_limit"  # 限流 — 可重试
+    CONNECTION = "connection"  # 连接失败 — 可重试
+    SERVER = "server"  # 服务端错误 — 可重试
+    EMPTY = "empty"  # 返回为空 — 不应重试
+    PARSE = "parse"  # 结构异常 — 不应重试
+    UNKNOWN = "unknown"  # 未知错误 — 可重试
 
     @property
     def retryable(self) -> bool:
-        return self in (ErrorCategory.TIMEOUT, ErrorCategory.RATE_LIMIT,
-                        ErrorCategory.CONNECTION, ErrorCategory.SERVER, ErrorCategory.UNKNOWN)
+        return self in (
+            ErrorCategory.TIMEOUT,
+            ErrorCategory.RATE_LIMIT,
+            ErrorCategory.CONNECTION,
+            ErrorCategory.SERVER,
+            ErrorCategory.UNKNOWN,
+        )
 
 
 class CircuitState(Enum):
-    CLOSED = "closed"            # 正常运行
-    OPEN = "open"                # 熔断开启，拒绝请求
-    HALF_OPEN = "half_open"      # 半开，允许试探
+    CLOSED = "closed"  # 正常运行
+    OPEN = "open"  # 熔断开启，拒绝请求
+    HALF_OPEN = "half_open"  # 半开，允许试探
 
 
 class CircuitBreaker:

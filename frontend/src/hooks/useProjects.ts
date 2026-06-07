@@ -95,7 +95,11 @@ export function useProjects(bridge: ProjectWorkspaceBridge) {
   }
 
   async function handleOpenProject(projectId: number) {
-    if (bridge.dirty && currentProjectId !== projectId && !window.confirm("当前内容有未保存修改，确定打开其他项目吗？")) {
+    if (
+      bridge.dirty &&
+      currentProjectId !== projectId &&
+      !window.confirm("当前内容有未保存修改，确定打开其他项目吗？")
+    ) {
       return;
     }
 
@@ -257,7 +261,10 @@ export function useProjects(bridge: ProjectWorkspaceBridge) {
     try {
       const result = await exportProject(currentProject.id, format);
       downloadBlob(result.blob, result.filename);
-      bridge.setStatus({ tone: "success", message: `已导出 ${format === "markdown" ? "Markdown" : format.toUpperCase()}。` });
+      bridge.setStatus({
+        tone: "success",
+        message: `已导出 ${format === "markdown" ? "Markdown" : format.toUpperCase()}。`,
+      });
     } catch (error) {
       bridge.setStatus({ tone: "error", message: error instanceof Error ? error.message : "导出失败" });
     } finally {

@@ -14,14 +14,30 @@ import { useWorkspace } from "./hooks/useWorkspace";
 function App() {
   const ws = useWorkspace();
   const projects = useProjects({
-    get title() { return ws.title; },
-    get genre() { return ws.genre; },
-    get content() { return ws.content; },
-    get yamlText() { return ws.yamlText; },
-    get parseResult() { return ws.parseResult; },
-    get validation() { return ws.validation; },
-    get generationMode() { return ws.generationMode?.mode; },
-    get dirty() { return ws.dirty; },
+    get title() {
+      return ws.title;
+    },
+    get genre() {
+      return ws.genre;
+    },
+    get content() {
+      return ws.content;
+    },
+    get yamlText() {
+      return ws.yamlText;
+    },
+    get parseResult() {
+      return ws.parseResult;
+    },
+    get validation() {
+      return ws.validation;
+    },
+    get generationMode() {
+      return ws.generationMode?.mode;
+    },
+    get dirty() {
+      return ws.dirty;
+    },
     applyProject(project) {
       ws._internal.setTitle(project.title);
       ws._internal.setGenre(project.genre);
@@ -47,7 +63,9 @@ function App() {
       ws._internal.setDirty(false);
       ws._internal.setStatus({ tone: "info", message: msg ?? "已清空输入内容。" });
     },
-    setStatus(s) { ws._internal.setStatus(s); },
+    setStatus(s) {
+      ws._internal.setStatus(s);
+    },
   });
 
   return (

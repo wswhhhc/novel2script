@@ -4,9 +4,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
-// Clear VITE_API_BASE_URL so code uses the fallback
-const ORIGINAL_ENV = process.env;
-
 interface MockResponseInit {
   ok?: boolean;
   status?: number;
@@ -124,9 +121,7 @@ describe("API Client", () => {
 
   describe("validateYaml", () => {
     it("sends post with yaml body", async () => {
-      mockFetch.mockResolvedValueOnce(
-        mockResponse({ body: { valid: true, errors: [] } })
-      );
+      mockFetch.mockResolvedValueOnce(mockResponse({ body: { valid: true, errors: [] } }));
 
       const result = await client.validateYaml("test: yaml");
 
@@ -158,7 +153,15 @@ describe("API Client", () => {
   describe("listProjects", () => {
     it("returns project array", async () => {
       const projects = [
-        { id: 1, title: "P1", genre: "悬疑", chapter_count: 3, generation_mode: "mock", created_at: "", updated_at: "" },
+        {
+          id: 1,
+          title: "P1",
+          genre: "悬疑",
+          chapter_count: 3,
+          generation_mode: "mock",
+          created_at: "",
+          updated_at: "",
+        },
       ];
       mockFetch.mockResolvedValueOnce(mockResponse({ body: projects }));
 
@@ -361,8 +364,15 @@ describe("API Client", () => {
 
   describe("getGenerationMode", () => {
     it("returns mode configuration", async () => {
-      const mode = { mode: "ai" as const, ai_enabled: true, provider: "openai", model: "deepseek-v4-flash",
-        base_url_configured: true, api_key_configured: true, auto_fix_attempts: 3 };
+      const mode = {
+        mode: "ai" as const,
+        ai_enabled: true,
+        provider: "openai",
+        model: "deepseek-v4-flash",
+        base_url_configured: true,
+        api_key_configured: true,
+        auto_fix_attempts: 3,
+      };
       mockFetch.mockResolvedValueOnce(mockResponse({ body: mode }));
 
       const result = await client.getGenerationMode();
@@ -374,9 +384,19 @@ describe("API Client", () => {
 
   describe("project CRUD", () => {
     it("getProject returns project detail", async () => {
-      const detail = { id: 1, title: "P1", genre: "悬疑", chapter_count: 3,
-        source_content: "c", chapters: [], current_yaml: "y", validation: { valid: true, errors: [] },
-        generation_mode: "mock" as const, created_at: "", updated_at: "" };
+      const detail = {
+        id: 1,
+        title: "P1",
+        genre: "悬疑",
+        chapter_count: 3,
+        source_content: "c",
+        chapters: [],
+        current_yaml: "y",
+        validation: { valid: true, errors: [] },
+        generation_mode: "mock" as const,
+        created_at: "",
+        updated_at: "",
+      };
       mockFetch.mockResolvedValueOnce(mockResponse({ body: detail }));
 
       const result = await client.getProject(1);
@@ -388,9 +408,21 @@ describe("API Client", () => {
     it("updateProject sends PUT with partial payload", async () => {
       const update = { title: "Updated" };
       mockFetch.mockResolvedValueOnce(
-        mockResponse({ body: { id: 1, title: "Updated", genre: "都市", chapter_count: 0,
-          source_content: "", chapters: [], current_yaml: "", validation: { valid: true, errors: [] },
-          generation_mode: "mock" as const, created_at: "", updated_at: "" } })
+        mockResponse({
+          body: {
+            id: 1,
+            title: "Updated",
+            genre: "都市",
+            chapter_count: 0,
+            source_content: "",
+            chapters: [],
+            current_yaml: "",
+            validation: { valid: true, errors: [] },
+            generation_mode: "mock" as const,
+            created_at: "",
+            updated_at: "",
+          },
+        })
       );
 
       const result = await client.updateProject(1, update);
@@ -439,10 +471,20 @@ describe("API Client", () => {
     });
 
     it("restoreVersion sends POST to restore endpoint", async () => {
-      const detail = { id: 1, title: "P1", genre: "悬疑", chapter_count: 3,
-        source_content: "", chapters: [], current_yaml: "", validation: { valid: true, errors: [] },
-        generation_mode: "mock" as const, created_at: "", updated_at: "",
-        restored_from_version: 1 };
+      const detail = {
+        id: 1,
+        title: "P1",
+        genre: "悬疑",
+        chapter_count: 3,
+        source_content: "",
+        chapters: [],
+        current_yaml: "",
+        validation: { valid: true, errors: [] },
+        generation_mode: "mock" as const,
+        created_at: "",
+        updated_at: "",
+        restored_from_version: 1,
+      };
       mockFetch.mockResolvedValueOnce(mockResponse({ body: detail }));
 
       const result = await client.restoreVersion(1, 1);
