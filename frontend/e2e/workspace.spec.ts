@@ -14,9 +14,21 @@ const sampleNovel = `第一章 雨夜相逢
 
 async function enterWorkspace(page: import("@playwright/test").Page) {
   // 工作区弹窗会在首次访问时弹出
-  await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
-  await page.getByPlaceholder("例如：my-project 或 张三").fill("e2e-test");
-  await page.getByRole("button", { name: "进入工作区" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible({ timeout: 5000 });
+
+  // 填入工作区名称
+  const input = page.getByPlaceholder("例如：my-project 或 张三");
+  await input.waitFor({ state: "visible" });
+  await input.fill("e2e-test");
+
+  // 点击进入（确保按钮已启用）
+  const submitBtn = page.getByRole("button", { name: "进入工作区" });
+  await expect(submitBtn).toBeEnabled();
+  await submitBtn.click();
+
+  // 等待弹窗完全消失
+  await page.waitForSelector(".modal-backdrop", { state: "detached", timeout: 5000 });
 }
 
 test.describe("Novel2Script", () => {
