@@ -11,7 +11,7 @@ from slowapi.util import get_remote_address
 from app.config.settings import settings
 from app.db.database import init_database
 from app.exceptions import AIServiceUnavailable, NotFoundError, ServiceError, ValidationError
-from app.routers import batch, chapters, projects, script
+from app.routers import batch, chapters, demo, projects, script
 
 # 加载项目根目录的 .env 文件
 env_path = Path(__file__).resolve().parents[2] / ".env"
@@ -81,6 +81,7 @@ app.add_middleware(
 )
 
 app.include_router(chapters.router)
+app.include_router(demo.router)
 app.include_router(script.router)
 app.include_router(projects.router)
 app.include_router(batch.router)

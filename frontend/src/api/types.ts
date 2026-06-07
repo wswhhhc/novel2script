@@ -125,3 +125,9 @@ export interface RestoreVersionResponse extends ProjectDetail {
 }
 
 export type ExportFormat = "yaml" | "json" | "markdown";
+
+export interface DemoInfo {
+  title: string;
+  genre: string;
+  content: string;
+}

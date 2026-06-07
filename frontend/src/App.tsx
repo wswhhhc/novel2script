@@ -1,7 +1,9 @@
-import { AlertTriangle, RefreshCw } from "lucide-react";
-import { CopyPlus, Save } from "lucide-react";
+import { AlertTriangle, Moon, RefreshCw, Sun } from "lucide-react";
+import { CopyPlus, Save, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
+import { getDemoInfo } from "./api/client";
 import { ChapterList } from "./components/ChapterList";
+import { CharacterGraph } from "./components/CharacterGraph";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ExportPanel } from "./components/ExportPanel";
 import { GenerationPanel } from "./components/GenerationPanel";
@@ -14,6 +16,7 @@ import { WorkspaceBadge } from "./components/WorkspaceBadge";
 import { WorkspaceDialog } from "./components/WorkspaceDialog";
 import { YamlEditor } from "./components/YamlEditor";
 import { useProjects } from "./hooks/useProjects";
+import { useTheme } from "./hooks/useTheme";
 import { useWorkspace } from "./hooks/useWorkspace";
 import { getWorkspace, setWorkspace } from "./utils/workspace";
 
@@ -38,8 +41,10 @@ function columnError(error: Error | null, reset: () => void) {
 }
 
 function App() {
+  const { theme, toggle: toggleTheme } = useTheme();
   const [workspace, setWorkspaceState] = useState<string>(() => getWorkspace());
   const [showWorkspaceDialog, setShowWorkspaceDialog] = useState(!getWorkspace());
+  const [demoLoading, setDemoLoading] = useState(false);
 
   function handleWorkspaceConfirm(name: string) {
     setWorkspace(name);
@@ -53,14 +58,35 @@ function App() {
     setShowWorkspaceDialog(true);
   }
 
-  // 工作区确认后自动加载项目列表
-  useEffect(() => {
-    if (workspace) {
-      projects.loadProjects();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workspace]);
   const ws = useWorkspace();
+
+  async function handleRunDemo() {
+    if (demoLoading || ws.generating || ws.parsing) return;
+    setDemoLoading(true);
+    ws._internal.setStatus({ tone: "info", message: "正在加载演示数据…" });
+    try {
+      const demo = await getDemoInfo();
+      ws._internal.setTitle(demo.title);
+      ws._internal.setGenre(demo.genre);
+      ws._internal.setContent(demo.content);
+      ws._internal.setParseResult(null);
+      ws._internal.setYamlText("");
+      ws._internal.setValidation(null);
+      ws._internal.setDirty(true);
+      ws._internal.setStatus({ tone: "success", message: `已加载演示小说《${demo.title}》，开始识别章节…` });
+
+      // 自动触发章节识别
+      ws.handleParse();
+    } catch (err) {
+      ws._internal.setStatus({
+        tone: "error",
+        message: err instanceof Error ? err.message : "加载演示数据失败",
+      });
+    } finally {
+      setDemoLoading(false);
+    }
+  }
+
   const projects = useProjects({
     get title() {
       return ws.title;
@@ -136,6 +162,20 @@ function App() {
           <div className="toolbar">
             <button
               type="button"
+              className="demo-trigger"
+              onClick={handleRunDemo}
+              disabled={demoLoading || ws.generating || ws.parsing}
+              title="一键加载演示小说并自动生成"
+            >
+              {demoLoading ? (
+                <span className="spinner" />
+              ) : (
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+              )}
+              <span>{demoLoading ? "加载中…" : "快速演示"}</span>
+            </button>
+            <button
+              type="button"
               className="icon-button strong"
               onClick={projects.handleSave}
               disabled={projects.saving || !ws.yamlText.trim()}
@@ -159,6 +199,19 @@ function App() {
               exporting={projects.exporting}
               onExport={projects.handleExport}
             />
+            <button
+              type="button"
+              className="icon-button theme-toggle"
+              onClick={toggleTheme}
+              title={theme === "light" ? "切换为暗色模式" : "切换为亮色模式"}
+              aria-label="切换主题"
+            >
+              {theme === "light" ? (
+                <Moon className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Sun className="h-4 w-4" aria-hidden="true" />
+              )}
+            </button>
           </div>
         </div>
       </header>
@@ -223,6 +276,7 @@ function App() {
               onYamlChange={ws.handleYamlChange}
               onValidate={ws.handleValidate}
             />
+            <CharacterGraph yamlText={ws.yamlText} />
             <VersionHistory
               versions={projects.versions}
               hasProject={Boolean(projects.currentProject)}

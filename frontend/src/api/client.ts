@@ -1,5 +1,6 @@
 import type {
   Chapter,
+  DemoInfo,
   GenerateScriptResponse,
   GenerateScriptStreamEvent,
   GenerationModeResponse,
@@ -79,6 +80,10 @@ function extractErrorMessage(data: unknown, fallback: string): string {
 
 export function checkHealth() {
   return request<HealthResponse>("/health");
+}
+
+export function getDemoInfo() {
+  return request<DemoInfo>("/api/demo/info");
 }
 
 export function getGenerationMode() {
