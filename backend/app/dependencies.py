@@ -2,6 +2,8 @@
 FastAPI 依赖注入模块
 """
 
+import re
+
 from fastapi import Header, HTTPException, status
 
 WORKSPACE_HEADER = "X-Workspace"
@@ -33,5 +35,4 @@ async def get_workspace(x_workspace: str = Header(default="default")) -> str:
 
 
 def _is_valid_workspace_name(name: str) -> bool:
-    import re
     return bool(re.match(r'^[\w一-鿿-]+$', name))

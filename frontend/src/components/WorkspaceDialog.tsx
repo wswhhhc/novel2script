@@ -1,4 +1,3 @@
-import { X } from "lucide-react";
 import type { FormEvent } from "react";
 import { useEffect, useId, useRef, useState } from "react";
 import { isValidWorkspaceName } from "../utils/workspace";
@@ -73,10 +72,9 @@ export function WorkspaceDialog({ open, onConfirm }: WorkspaceDialogProps) {
             <p className="panel-kicker">欢迎使用 Novel2Script</p>
             <h2 id={headingId}>进入工作区</h2>
           </div>
-          {/* 不允许关闭——必须输入 */}
         </div>
 
-        <p style={{ margin: "0 0 12px", color: "var(--color-text-secondary)", fontSize: "0.875rem" }}>
+        <p style={{ margin: "0 0 12px", color: "#56615c", fontSize: "0.875rem", lineHeight: 1.5 }}>
           工作区用于隔离不同用户的数据。输入你的工作区名称，不同工作区之间的项目互不可见。
         </p>
 
@@ -94,7 +92,7 @@ export function WorkspaceDialog({ open, onConfirm }: WorkspaceDialogProps) {
         </label>
 
         {error && (
-          <p style={{ color: "var(--color-error)", fontSize: "0.8rem", margin: "4px 0 0" }}>{error}</p>
+          <p style={{ color: "#b9472f", fontSize: "0.8rem", margin: "4px 0 0" }}>{error}</p>
         )}
 
         <div className="modal-actions" style={{ marginTop: "16px" }}>

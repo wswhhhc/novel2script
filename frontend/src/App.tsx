@@ -105,7 +105,7 @@ function App() {
           </p>
         </div>
         <div className="topbar-actions">
-          <WorkspaceBadge workspace={workspace} onChangeClick={handleSwitchWorkspace} />
+          <WorkspaceBadge workspace={workspace} onSwitch={handleSwitchWorkspace} />
           <div className="topbar-metrics" aria-label="工作台统计">
             <span>{ws.content.length.toLocaleString()} 字输入</span>
             <span>{ws.parseResult?.chapter_count ?? 0} 章</span>
