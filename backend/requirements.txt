@@ -2,6 +2,8 @@ fastapi
 uvicorn
 pydantic
 pydantic-settings
+slowapi
+alembic
 PyYAML
 jsonschema
 pytest

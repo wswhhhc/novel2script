@@ -3,6 +3,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 from app.config.settings import settings
 from app.db.database import init_database
@@ -11,6 +14,12 @@ from app.routers import batch, chapters, projects, script
 # 加载项目根目录的 .env 文件
 env_path = Path(__file__).resolve().parents[2] / ".env"
 load_dotenv(dotenv_path=env_path)
+
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["60/minute"],
+    enabled=settings.enable_rate_limiting,
+)
 
 app = FastAPI(
     title="Novel2Script API",
@@ -40,6 +49,9 @@ app = FastAPI(
     },
 )
 init_database()
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,

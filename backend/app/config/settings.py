@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     enable_generation_cache: bool = True
     auto_fix_attempts: int = 3
 
+    # 安全配置
+    enable_rate_limiting: bool = True
+
     # 路径（衍生属性）
     backend_root: Path = BACKEND_ROOT
     project_root: Path = PROJECT_ROOT
