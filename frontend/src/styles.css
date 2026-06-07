@@ -1253,6 +1253,18 @@ button:disabled {
   color: #d48478;
 }
 
+[data-theme="dark"] .badge.neutral {
+  background: #1e2528;
+  border-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .badge.ai {
+  background: #11222e;
+  border-color: #1a3a4a;
+  color: #7fb8d4;
+}
+
 [data-theme="dark"] .chapter-item p {
   color: var(--text-secondary);
 }
