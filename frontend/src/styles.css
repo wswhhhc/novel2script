@@ -828,6 +828,19 @@ button:disabled {
   margin-top: 4px;
 }
 
+.modal-desc {
+  margin: 0 0 12px;
+  color: #56615c;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.field-error {
+  margin: 4px 0 0;
+  color: #b9472f;
+  font-size: 0.8rem;
+}
+
 @media (max-width: 1320px) {
   .workspace {
     grid-template-columns: minmax(220px, 0.8fr) 1fr;

@@ -68,7 +68,7 @@ export function WorkspaceDialog({ open, onConfirm }: WorkspaceDialogProps) {
           </div>
         </div>
 
-        <p style={{ margin: "0 0 12px", color: "#56615c", fontSize: "0.875rem", lineHeight: 1.5 }}>
+        <p className="modal-desc">
           工作区用于隔离不同用户的数据。输入你的工作区名称，不同工作区之间的项目互不可见。
         </p>
 
@@ -85,9 +85,9 @@ export function WorkspaceDialog({ open, onConfirm }: WorkspaceDialogProps) {
           />
         </label>
 
-        {error && <p style={{ color: "#b9472f", fontSize: "0.8rem", margin: "4px 0 0" }}>{error}</p>}
+        {error && <p className="field-error">{error}</p>}
 
-        <div className="modal-actions" style={{ marginTop: "16px" }}>
+        <div className="modal-actions">
           <button type="submit" className="primary-button" disabled={!name.trim()}>
             进入工作区
           </button>

@@ -32,8 +32,10 @@ class Settings(BaseSettings):
     model_timeout: int = 120
     model_max_retries: int = 2
 
-    # CORS 配置（逗号分隔的字符串，通过 property 转为 list）
-    CORS_ORIGINS: str = "http://127.0.0.1:5173,http://localhost:5173,http://127.0.0.1:15173,http://120.53.0.252"
+    # CORS 配置
+    # 开发默认允许本地端口；生产环境通过系统环境变量或 .env 文件覆盖
+    # 例：CORS_ORIGINS=http://127.0.0.1:5173,http://localhost:5173,https://your-domain.com
+    CORS_ORIGINS: str = "http://127.0.0.1:5173,http://localhost:5173,http://127.0.0.1:15173"
 
     # 生成配置
     enable_ai_generation: bool = False
@@ -59,7 +61,10 @@ class Settings(BaseSettings):
 
     @property
     def database_path(self) -> Path:
-        return Path(self.NOVEL2SCRIPT_DB_PATH)
+        db_path = Path(self.NOVEL2SCRIPT_DB_PATH)
+        if not db_path.is_absolute():
+            db_path = self.project_root / db_path
+        return db_path
 
     @property
     def schema_path(self) -> Path:
