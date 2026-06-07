@@ -8,6 +8,7 @@ MODEL_API_KEY 后才会调用模型。
 import json
 import time
 from collections.abc import Iterator
+from enum import Enum
 from typing import Any
 
 from app.config.settings import settings
@@ -15,6 +16,83 @@ from app.config.settings import settings
 
 class AIClientError(Exception):
     """AI 客户端调用错误。"""
+
+
+class ErrorCategory(Enum):
+    """AI 调用错误分类，用于决定是否重试。"""
+
+    AUTH = "auth"                # 认证失败 — 不应重试
+    TIMEOUT = "timeout"          # 超时 — 可重试
+    RATE_LIMIT = "rate_limit"    # 限流 — 可重试
+    CONNECTION = "connection"    # 连接失败 — 可重试
+    SERVER = "server"            # 服务端错误 — 可重试
+    EMPTY = "empty"              # 返回为空 — 不应重试
+    PARSE = "parse"              # 结构异常 — 不应重试
+    UNKNOWN = "unknown"          # 未知错误 — 可重试
+
+    @property
+    def retryable(self) -> bool:
+        return self in (ErrorCategory.TIMEOUT, ErrorCategory.RATE_LIMIT,
+                        ErrorCategory.CONNECTION, ErrorCategory.SERVER, ErrorCategory.UNKNOWN)
+
+
+class CircuitState(Enum):
+    CLOSED = "closed"            # 正常运行
+    OPEN = "open"                # 熔断开启，拒绝请求
+    HALF_OPEN = "half_open"      # 半开，允许试探
+
+
+class CircuitBreaker:
+    """简单的内存熔断器，防止持续调用失败的 AI 服务。"""
+
+    def __init__(self, failure_threshold: int = 5, recovery_timeout: float = 60.0):
+        self._failure_threshold = failure_threshold
+        self._recovery_timeout = recovery_timeout
+        self._state = CircuitState.CLOSED
+        self._failure_count = 0
+        self._last_failure_time = 0.0
+
+    @property
+    def state(self) -> CircuitState:
+        if self._state == CircuitState.OPEN and time.monotonic() - self._last_failure_time > self._recovery_timeout:
+            self._state = CircuitState.HALF_OPEN
+        return self._state
+
+    def call(self, fn, *args, **kwargs):
+        """在熔断保护下调用函数。"""
+        if self.state == CircuitState.OPEN:
+            raise AIClientError(
+                f"AI 服务熔断中（连续 {self._failure_count} 次失败），"
+                f"将在 {int(self._recovery_timeout - (time.monotonic() - self._last_failure_time))} 秒后自动恢复"
+            )
+
+        try:
+            result = fn(*args, **kwargs)
+            self._on_success()
+            return result
+        except AIClientError:
+            self._on_failure()
+            raise
+
+    def _on_success(self):
+        self._failure_count = 0
+        if self._state == CircuitState.HALF_OPEN:
+            self._state = CircuitState.CLOSED
+
+    def _on_failure(self):
+        self._failure_count += 1
+        self._last_failure_time = time.monotonic()
+        if self._failure_count >= self._failure_threshold:
+            self._state = CircuitState.OPEN
+
+    def reset(self):
+        self._state = CircuitState.CLOSED
+        self._failure_count = 0
+        self._last_failure_time = 0.0
+
+
+# 全局熔断器实例
+_circuit_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60.0)
 
 
 def call_ai_model(prompt: str, max_retries: int | None = None) -> str:
@@ -42,13 +120,14 @@ def call_ai_model(prompt: str, max_retries: int | None = None) -> str:
     for attempt in range(retries + 1):
         try:
             if provider == "openai":
-                return _call_openai(prompt)
+                return _circuit_breaker.call(_do_call_openai, prompt)
             if provider == "anthropic":
-                return _call_anthropic(prompt)
+                return _circuit_breaker.call(_do_call_anthropic, prompt)
             raise AIClientError(f"不支持的 AI 提供商：{provider}")
         except AIClientError as exc:
             last_error = exc
-            if not _should_retry_error(exc) or attempt >= retries:
+            category = _classify_error(exc)
+            if not category.retryable or attempt >= retries:
                 raise
             time.sleep(3 * (attempt + 1))
 
@@ -66,11 +145,31 @@ def stream_ai_model(prompt: str) -> Iterator[str]:
 
     provider = settings.model_provider.lower().strip()
     if provider == "openai":
-        yield from _stream_openai(prompt)
+        yield from _circuit_breaker.call(_do_stream_openai, prompt)
     elif provider == "anthropic":
-        yield from _stream_anthropic(prompt)
+        yield from _circuit_breaker.call(_do_stream_anthropic, prompt)
     else:
         raise AIClientError(f"不支持的 AI 提供商：{provider}")
+
+
+def _classify_error(error: AIClientError) -> ErrorCategory:
+    """根据错误信息分类错误类型。"""
+    msg = str(error)
+    if "认证" in msg or "MODEL_API_KEY" in msg:
+        return ErrorCategory.AUTH
+    if "超时" in msg:
+        return ErrorCategory.TIMEOUT
+    if "限流" in msg or "429" in msg or "额度" in msg:
+        return ErrorCategory.RATE_LIMIT
+    if "连接失败" in msg:
+        return ErrorCategory.CONNECTION
+    if "服务端错误" in msg:
+        return ErrorCategory.SERVER
+    if "为空" in msg:
+        return ErrorCategory.EMPTY
+    if "结构异常" in msg or "解析失败" in msg:
+        return ErrorCategory.PARSE
+    return ErrorCategory.UNKNOWN
 
 
 # ── OpenAI ────────────────────────────────────────────────────────────
@@ -119,7 +218,7 @@ def _extract_openai_content(response) -> str:
     return content.strip()
 
 
-def _call_openai(prompt: str) -> str:
+def _do_call_openai(prompt: str) -> str:
     """调用 OpenAI 兼容 API（非流式）。"""
     client = _build_openai_client()
     try:
@@ -134,7 +233,7 @@ def _call_openai(prompt: str) -> str:
     return _extract_openai_content(response)
 
 
-def _stream_openai(prompt: str) -> Iterator[str]:
+def _do_stream_openai(prompt: str) -> Iterator[str]:
     """调用 OpenAI 兼容 API（流式），逐 chunk 产出内容。"""
     client = _build_openai_client()
     try:
@@ -214,7 +313,7 @@ def _extract_anthropic_content(response) -> str:
     return content.strip()
 
 
-def _call_anthropic(prompt: str) -> str:
+def _do_call_anthropic(prompt: str) -> str:
     """调用 Anthropic API（非流式）。"""
     client = _build_anthropic_client()
     try:
@@ -229,7 +328,7 @@ def _call_anthropic(prompt: str) -> str:
     return _extract_anthropic_content(response)
 
 
-def _stream_anthropic(prompt: str) -> Iterator[str]:
+def _do_stream_anthropic(prompt: str) -> Iterator[str]:
     """调用 Anthropic API（流式），逐 chunk 产出内容。"""
     client = _build_anthropic_client()
     yielded = False
@@ -306,10 +405,3 @@ def _response_snippet(text: str, limit: int = 300) -> str:
     """截取响应前 N 字符用于错误信息（将空白压缩为单空格）。"""
     compact = " ".join(text.strip().split())
     return compact[:limit] + "..." if len(compact) > limit else compact
-
-
-def _should_retry_error(error: AIClientError) -> bool:
-    """判断一个 AIClientError 是否值得重试。"""
-    message = str(error)
-    retry_markers = ["超时", "限流", "429", "服务端错误", "连接失败"]
-    return any(marker in message for marker in retry_markers)
