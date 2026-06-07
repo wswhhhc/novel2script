@@ -1186,12 +1186,6 @@ button:disabled {
   border-top-color: var(--accent);
 }
 
-[data-theme="dark"] .validation-panel.neutral {
-  background: var(--bg-code);
-  border-color: var(--border-color);
-  color: var(--text-secondary);
-}
-
 [data-theme="dark"] .editor-loading {
   color: var(--text-muted);
 }
@@ -1205,4 +1199,112 @@ button:disabled {
 
 [data-theme="dark"] .version-empty {
   color: var(--text-muted);
+}
+
+/* ── Status banners (dark) ──────────────────────────── */
+
+[data-theme="dark"] .status-info {
+  border-color: #2a4050;
+  background: #1c2a33;
+  color: #8cb4cc;
+}
+
+[data-theme="dark"] .status-success {
+  border-color: #1e3d2e;
+  background: #16261d;
+  color: #6bb392;
+}
+
+[data-theme="dark"] .status-warning {
+  border-color: #4a3e1a;
+  background: #2a2412;
+  color: #d4b06a;
+}
+
+[data-theme="dark"] .status-error {
+  border-color: #4a2420;
+  background: #2e1815;
+  color: #d48478;
+}
+
+/* ── Validation panel (dark) ────────────────────────── */
+
+[data-theme="dark"] .validation-panel.valid {
+  background: #16261d;
+  border-color: #1e3d2e;
+  color: #6bb392;
+}
+
+[data-theme="dark"] .validation-panel.invalid {
+  background: #2e1815;
+  border-color: #4a2420;
+  color: #d48478;
+}
+
+[data-theme="dark"] .validation-panel.neutral {
+  background: var(--bg-code);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+/* ── Misc dark overrides ────────────────────────────── */
+
+[data-theme="dark"] .field-error {
+  color: #d48478;
+}
+
+[data-theme="dark"] .chapter-item p {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .progress-head {
+  color: #d4b06a;
+}
+
+[data-theme="dark"] .process-list .active {
+  color: #d4b06a;
+}
+
+[data-theme="dark"] .process-list .active .substeps small {
+  color: #d4b06a;
+}
+
+[data-theme="dark"] .progress-track {
+  background: #4a3e1a;
+}
+
+[data-theme="dark"] .chapter-id,
+[data-theme="dark"] .chapter-count {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .chapter-summary strong {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .panel-kicker {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] textarea,
+[data-theme="dark"] .novel-textarea {
+  scrollbar-color: #3a464b transparent;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #3a464b;
+  border-radius: 4px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #4a565b;
 }
