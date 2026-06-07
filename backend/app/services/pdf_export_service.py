@@ -7,7 +7,6 @@ from io import BytesIO
 from typing import Any
 
 import yaml
-from fastapi import HTTPException, status
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
@@ -21,6 +20,7 @@ from reportlab.platypus import (
     TableStyle,
 )
 
+from app.exceptions import ValidationError
 from app.schemas.projects import ProjectDetailResponse
 
 
@@ -40,16 +40,10 @@ def export_project_pdf(project: ProjectDetailResponse) -> bytes:
     try:
         script_data = yaml.safe_load(project.current_yaml)
     except yaml.YAMLError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"YAML 解析失败，无法导出 PDF：{exc}",
-        ) from exc
+        raise ValidationError(f"YAML 解析失败，无法导出 PDF：{exc}") from exc
 
     if not isinstance(script_data, dict) or "script" not in script_data:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="YAML 格式错误：缺少 script 顶层字段",
-        )
+        raise ValidationError("YAML 格式错误：缺少 script 顶层字段")
 
     script = script_data["script"]
     buffer = BytesIO()

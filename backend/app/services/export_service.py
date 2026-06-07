@@ -4,8 +4,9 @@ from urllib.parse import quote
 from typing import Any
 
 import yaml
-from fastapi import HTTPException, Response, status
+from fastapi import Response
 
+from app.exceptions import ValidationError
 from app.services.project_service import get_project_detail
 
 FILENAME_SAFE_RE = re.compile(r'[\\/:*?"<>|\s]+')
@@ -49,13 +50,10 @@ def _parse_yaml(yaml_text: str) -> Any:
     try:
         document = yaml.safe_load(yaml_text)
     except yaml.YAMLError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"YAML 无法解析，不能导出：{exc}",
-        ) from exc
+        raise ValidationError(f"YAML 无法解析，不能导出：{exc}") from exc
 
     if document is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="YAML 内容为空，不能导出")
+        raise ValidationError("YAML 内容为空，不能导出")
     return document
 
 

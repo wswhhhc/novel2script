@@ -1,14 +1,16 @@
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from app.config.settings import settings
 from app.db.database import init_database
+from app.exceptions import AIServiceUnavailable, NotFoundError, ServiceError, ValidationError
 from app.routers import batch, chapters, projects, script
 
 # 加载项目根目录的 .env 文件
@@ -52,6 +54,23 @@ init_database()
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+@app.exception_handler(ServiceError)
+def handle_service_error(request, exc: ServiceError) -> JSONResponse:
+    """将服务层自定义异常映射为对应的 HTTP 状态码。"""
+    status_map: dict[type[ServiceError], int] = {
+        NotFoundError: status.HTTP_404_NOT_FOUND,
+        ValidationError: status.HTTP_400_BAD_REQUEST,
+        AIServiceUnavailable: status.HTTP_503_SERVICE_UNAVAILABLE,
+    }
+    code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    for exc_type, http_code in status_map.items():
+        if isinstance(exc, exc_type):
+            code = http_code
+            break
+    return JSONResponse(status_code=code, content={"detail": str(exc)})
+
 
 app.add_middleware(
     CORSMiddleware,

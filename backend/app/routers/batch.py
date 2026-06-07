@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
 from app.dependencies import get_workspace
+from app.exceptions import NotFoundError
 from app.services.project_service import delete_project, get_project_detail
 
 router = APIRouter(prefix="/api/batch", tags=["batch"])
@@ -49,9 +50,9 @@ def batch_delete_projects(
         try:
             delete_project(project_id, workspace)
             deleted_count += 1
-        except HTTPException as exc:
+        except NotFoundError as exc:
             failed_ids.append(project_id)
-            errors.append(f"项目 {project_id}: {exc.detail}")
+            errors.append(f"项目 {project_id}: {exc}")
         except Exception as exc:
             failed_ids.append(project_id)
             errors.append(f"项目 {project_id}: {str(exc)}")

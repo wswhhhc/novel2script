@@ -1,6 +1,8 @@
+import { AlertTriangle, RefreshCw } from "lucide-react";
 import { CopyPlus, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ChapterList } from "./components/ChapterList";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ExportPanel } from "./components/ExportPanel";
 import { GenerationPanel } from "./components/GenerationPanel";
 import { NovelInput } from "./components/NovelInput";
@@ -14,6 +16,26 @@ import { YamlEditor } from "./components/YamlEditor";
 import { useProjects } from "./hooks/useProjects";
 import { useWorkspace } from "./hooks/useWorkspace";
 import { getWorkspace, setWorkspace } from "./utils/workspace";
+
+/** 区域级错误 fallback：某列崩溃时只替换该列区域，不影响其他区域。 */
+function columnError(error: Error | null, reset: () => void) {
+  return (
+    <div className="column-error" role="alert">
+      <AlertTriangle className="column-error-icon" aria-hidden="true" />
+      <p>该区域发生异常，请尝试恢复或刷新页面。</p>
+      {error && (
+        <details className="column-error-details">
+          <summary>错误详情</summary>
+          <pre>{error.message}</pre>
+        </details>
+      )}
+      <button type="button" className="ghost-button column-error-retry" onClick={reset}>
+        <RefreshCw className="h-4 w-4" aria-hidden="true" />
+        恢复
+      </button>
+    </div>
+  );
+}
 
 function App() {
   const [workspace, setWorkspaceState] = useState<string>(() => getWorkspace());
@@ -142,66 +164,74 @@ function App() {
       </header>
 
       <main className="workspace">
-        <ProjectSidebar
-          projects={projects.projects}
-          currentProjectId={projects.currentProjectId}
-          loading={projects.projectLoading}
-          onRefresh={projects.loadProjects}
-          onOpen={projects.handleOpenProject}
-          onDelete={projects.handleDeleteProject}
-          onNew={projects.handleNewProject}
-        />
+        <ErrorBoundary fallback={columnError}>
+          <ProjectSidebar
+            projects={projects.projects}
+            currentProjectId={projects.currentProjectId}
+            loading={projects.projectLoading}
+            onRefresh={projects.loadProjects}
+            onOpen={projects.handleOpenProject}
+            onDelete={projects.handleDeleteProject}
+            onNew={projects.handleNewProject}
+          />
+        </ErrorBoundary>
 
-        <div className="left-column">
-          <NovelInput
-            title={ws.title}
-            genre={ws.genre}
-            content={ws.content}
-            onTitleChange={ws.handleTitleChange}
-            onGenreChange={ws.handleGenreChange}
-            onContentChange={ws.handleContentChange}
-            onFileLoaded={ws.handleFileLoaded}
-            onFileError={(msg) => ws.setStatus({ tone: "error", message: msg })}
-            onClear={ws.handleClear}
-          />
-        </div>
+        <ErrorBoundary fallback={columnError}>
+          <div className="left-column">
+            <NovelInput
+              title={ws.title}
+              genre={ws.genre}
+              content={ws.content}
+              onTitleChange={ws.handleTitleChange}
+              onGenreChange={ws.handleGenreChange}
+              onContentChange={ws.handleContentChange}
+              onFileLoaded={ws.handleFileLoaded}
+              onFileError={(msg) => ws.setStatus({ tone: "error", message: msg })}
+              onClear={ws.handleClear}
+            />
+          </div>
+        </ErrorBoundary>
 
-        <div className="middle-column">
-          <StatusBanner tone={ws.status.tone as BannerTone} message={ws.status.message} />
-          <GenerationPanel
-            canParse={ws.canParse}
-            canGenerate={ws.canGenerate}
-            parsing={ws.parsing}
-            generating={ws.generating}
-            validating={ws.validating}
-            generationProgress={ws.generationProgress}
-            generationMessage={ws.generationMessage}
-            chapterCount={ws.parseResult?.chapter_count ?? 0}
-            generationMode={ws.generationMode}
-            onParse={ws.handleParse}
-            onGenerate={ws.handleGenerate}
-          />
-          <ChapterList result={ws.parseResult} />
-        </div>
+        <ErrorBoundary fallback={columnError}>
+          <div className="middle-column">
+            <StatusBanner tone={ws.status.tone as BannerTone} message={ws.status.message} />
+            <GenerationPanel
+              canParse={ws.canParse}
+              canGenerate={ws.canGenerate}
+              parsing={ws.parsing}
+              generating={ws.generating}
+              validating={ws.validating}
+              generationProgress={ws.generationProgress}
+              generationMessage={ws.generationMessage}
+              chapterCount={ws.parseResult?.chapter_count ?? 0}
+              generationMode={ws.generationMode}
+              onParse={ws.handleParse}
+              onGenerate={ws.handleGenerate}
+            />
+            <ChapterList result={ws.parseResult} />
+          </div>
+        </ErrorBoundary>
 
-        <div className="right-column">
-          <YamlEditor
-            title={ws.title}
-            yamlText={ws.yamlText}
-            validation={ws.validation}
-            generating={ws.generating}
-            validating={ws.validating}
-            onYamlChange={ws.handleYamlChange}
-            onValidate={ws.handleValidate}
-          />
-          <VersionHistory
-            versions={projects.versions}
-            hasProject={Boolean(projects.currentProject)}
-            loading={projects.versionLoading}
-            onCreateVersion={projects.handleCreateVersion}
-            onRestoreVersion={projects.handleRestoreVersion}
-          />
-        </div>
+        <ErrorBoundary fallback={columnError}>
+          <div className="right-column">
+            <YamlEditor
+              title={ws.title}
+              yamlText={ws.yamlText}
+              validation={ws.validation}
+              generating={ws.generating}
+              validating={ws.validating}
+              onYamlChange={ws.handleYamlChange}
+              onValidate={ws.handleValidate}
+            />
+            <VersionHistory
+              versions={projects.versions}
+              hasProject={Boolean(projects.currentProject)}
+              loading={projects.versionLoading}
+              onCreateVersion={projects.handleCreateVersion}
+              onRestoreVersion={projects.handleRestoreVersion}
+            />
+          </div>
+        </ErrorBoundary>
       </main>
 
       <SaveProjectDialog

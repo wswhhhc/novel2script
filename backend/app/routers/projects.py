@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from fastapi.responses import Response
 
 from app.dependencies import get_workspace
@@ -213,15 +213,10 @@ def export_pdf_endpoint(
     """导出 PDF 格式"""
     from app.services.export_service import _build_filename
 
-    try:
-        project = get_project_detail(project_id, workspace)
-        pdf_bytes = export_project_pdf(project)
+    project = get_project_detail(project_id, workspace)
+    pdf_bytes = export_project_pdf(project)
 
-        filename = _build_filename(project.title, "pdf")
-        headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
+    filename = _build_filename(project.title, "pdf")
+    headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
 
-        return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
-    except Exception as exc:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"PDF 导出失败：{str(exc)}"
-        ) from exc
+    return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)

@@ -2,6 +2,8 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
+  /** 可选的自定义 fallback UI。不传时使用默认的全页错误界面。 */
+  fallback?: (error: Error | null, reset: () => void) => ReactNode;
 }
 
 interface State {
@@ -10,8 +12,10 @@ interface State {
 }
 
 /**
- * 顶层错误边界，捕获组件树中的渲染异常。
- * 避免某个组件 throw 导致整个工作台白屏。
+ * 错误边界，捕获子组件树中的渲染异常。
+ *
+ * - 顶层使用（无 fallback）：显示全页错误界面 + 刷新/恢复按钮
+ * - 局部使用（传 fallback）：显示区域级错误卡片，不波及整体布局
  */
 export class ErrorBoundary extends Component<Props, State> {
   state: State = { hasError: false, error: null };
@@ -30,6 +34,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback(this.state.error, this.handleReset);
+      }
+
       return (
         <div className="error-boundary-fallback">
           <div className="error-boundary-card">

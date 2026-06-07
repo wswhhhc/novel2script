@@ -7,9 +7,9 @@ import re
 from collections.abc import Iterator
 
 import yaml
-from fastapi import HTTPException, status
 
 from app.config.settings import settings
+from app.exceptions import AIServiceUnavailable, ServiceError, ValidationError
 from app.schemas.requests import ChapterInput
 from app.schemas.responses import GenerateScriptResponse
 from app.services.ai_client import AIClientError, call_ai_model, parse_json_response, stream_ai_model
@@ -38,10 +38,7 @@ def generate_script_mock(title: str, genre: str, chapters: list[ChapterInput]) -
     try:
         yaml_text = settings.sample_output_path.read_text(encoding="utf-8")
     except FileNotFoundError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"示例 YAML 文件不存在：{settings.sample_output_path}",
-        ) from exc
+        raise ServiceError(f"示例 YAML 文件不存在：{settings.sample_output_path}") from exc
 
     validation = validate_script_yaml(yaml_text)
     return GenerateScriptResponse(yaml=yaml_text, validation=validation)
@@ -98,15 +95,7 @@ def generate_script_with_ai(title: str, genre: str, chapters: list[ChapterInput]
         return GenerateScriptResponse(yaml=yaml_text, validation=validation)
 
     except AIClientError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"AI 服务调用失败：{str(exc)}",
-        ) from exc
-    except Exception as exc:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"剧本生成过程出错：{str(exc)}",
-        ) from exc
+        raise AIServiceUnavailable(f"AI 服务调用失败：{str(exc)}") from exc
 
 
 def generate_script_stream_events(title: str, genre: str, chapters: list[ChapterInput]) -> Iterator[dict]:
@@ -190,35 +179,28 @@ def generate_script_stream_events(title: str, genre: str, chapters: list[Chapter
 def _validate_input(title: str, genre: str, chapters: list[ChapterInput]) -> None:
     """验证输入参数"""
     if not title or not title.strip():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="小说标题不能为空",
-        )
+        raise ValidationError("小说标题不能为空")
 
     if len(chapters) < settings.min_chapters:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"章节数量不足，需要至少 {settings.min_chapters} 个章节，当前收到 {len(chapters)} 个章节",
+        raise ValidationError(
+            f"章节数量不足，需要至少 {settings.min_chapters} 个章节，当前收到 {len(chapters)} 个章节"
         )
 
     if len(chapters) > settings.max_chapters:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"章节数量过多，最多支持 {settings.max_chapters} 个章节，当前收到 {len(chapters)} 个章节",
+        raise ValidationError(
+            f"章节数量过多，最多支持 {settings.max_chapters} 个章节，当前收到 {len(chapters)} 个章节"
         )
 
     total_content_length = sum(len(chapter.content) for chapter in chapters)
     if total_content_length > settings.max_input_length:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"输入文本过长（{total_content_length} 字），超出上限 {settings.max_input_length} 字，请精简内容",
+        raise ValidationError(
+            f"输入文本过长（{total_content_length} 字），超出上限 {settings.max_input_length} 字，请精简内容"
         )
 
     for index, chapter in enumerate(chapters, start=1):
         if not CHAPTER_ID_RE.fullmatch(chapter.id):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"第 {index} 个章节 ID 格式错误：{chapter.id}，应为 C001-C999",
+            raise ValidationError(
+                f"第 {index} 个章节 ID 格式错误：{chapter.id}，应为 C001-C999"
             )
 
 

@@ -2,9 +2,8 @@ import json
 from datetime import datetime, timezone
 from sqlite3 import Row
 
-from fastapi import HTTPException, status
-
 from app.db.database import get_connection
+from app.exceptions import NotFoundError, ValidationError
 from app.schemas.projects import (
     ProjectCreateRequest,
     ProjectDetailResponse,
@@ -234,7 +233,7 @@ def _get_version_row(project_id: int, version_id: int, workspace: str = "default
             (version_id, project_id),
         ).fetchone()
     if row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"版本不存在：{version_id}")
+        raise NotFoundError(f"版本不存在：{version_id}")
     return row
 
 
@@ -295,4 +294,4 @@ def _now() -> str:
 
 
 def _raise_project_not_found(project_id: int) -> None:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"项目不存在：{project_id}")
+    raise NotFoundError(f"项目不存在：{project_id}")

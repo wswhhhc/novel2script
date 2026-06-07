@@ -994,3 +994,63 @@ button:disabled {
 .error-boundary-actions .primary-button {
   font-size: 0.875rem;
 }
+
+/* ── Column-level ErrorBoundary fallback ─────────────── */
+
+.column-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 240px;
+  padding: 18px;
+  border: 1px dashed #e0b5aa;
+  border-radius: 8px;
+  background: #fff5f2;
+  color: #7a2d1c;
+  text-align: center;
+  font-size: 0.86rem;
+}
+
+.column-error-icon {
+  width: 28px;
+  height: 28px;
+  color: #b9472f;
+}
+
+.column-error p {
+  margin: 0;
+  max-width: 220px;
+  line-height: 1.45;
+}
+
+.column-error-details {
+  width: 100%;
+  text-align: left;
+}
+
+.column-error-details summary {
+  cursor: pointer;
+  color: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.column-error-details pre {
+  margin: 6px 0 0;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+  font-size: 0.76rem;
+  word-break: break-word;
+  color: #5c352c;
+  max-height: 120px;
+  overflow: auto;
+}
+
+.column-error-retry {
+  min-height: 36px;
+  border-color: #d9a79a;
+  color: #7a2d1c;
+}
