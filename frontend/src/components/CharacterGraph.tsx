@@ -1,11 +1,4 @@
-import {
-  Background,
-  Controls,
-  MarkerType,
-  ReactFlow,
-  type Edge,
-  type Node,
-} from "@xyflow/react";
+import { Background, Controls, MarkerType, ReactFlow, type Edge, type Node } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useMemo } from "react";
 import yaml from "js-yaml";
@@ -70,10 +63,7 @@ function circularLayout(nodes: CharNode[]): Node[] {
   });
 }
 
-function buildEdges(
-  chars: CharNode[],
-  scenes: Array<{ characters?: string[] }>
-): Edge[] {
+function buildEdges(chars: CharNode[], scenes: Array<{ characters?: string[] }>): Edge[] {
   const edges: Edge[] = [];
   const charMap = new Map(chars.map((c) => [c.id, c]));
 

@@ -167,11 +167,7 @@ function App() {
               disabled={demoLoading || ws.generating || ws.parsing}
               title="一键加载演示小说并自动生成"
             >
-              {demoLoading ? (
-                <span className="spinner" />
-              ) : (
-                <Sparkles className="h-4 w-4" aria-hidden="true" />
-              )}
+              {demoLoading ? <span className="spinner" /> : <Sparkles className="h-4 w-4" aria-hidden="true" />}
               <span>{demoLoading ? "加载中…" : "快速演示"}</span>
             </button>
             <button
