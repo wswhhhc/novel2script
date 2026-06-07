@@ -67,7 +67,7 @@ test.describe("Novel2Script 核心流程", () => {
       else if (dialog.message().includes("版本说明")) dialog.accept("初始版本");
       else dialog.accept();
     });
-    await page.getByRole("button", { name: /创建版本/ }).click();
+    await page.getByTitle("保存版本快照").click();
     await expect(page.getByText(/已保存版本：v1.0/)).toBeVisible();
     await expect(page.getByText("v1.0")).toBeVisible();
 
