@@ -5,9 +5,10 @@
 
 from typing import List
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
+from app.dependencies import get_workspace
 from app.services.project_service import delete_project, get_project_detail
 
 router = APIRouter(prefix="/api/batch", tags=["batch"])
@@ -29,7 +30,10 @@ class BatchDeleteResponse(BaseModel):
     summary="批量删除项目",
     description="一次性删除多个项目及其所有版本快照。最多支持 50 个项目。",
 )
-def batch_delete_projects(request: BatchDeleteRequest) -> BatchDeleteResponse:
+def batch_delete_projects(
+    request: BatchDeleteRequest,
+    workspace: str = Depends(get_workspace),
+) -> BatchDeleteResponse:
     """批量删除项目"""
     if len(request.project_ids) > 50:
         raise HTTPException(
@@ -43,7 +47,7 @@ def batch_delete_projects(request: BatchDeleteRequest) -> BatchDeleteResponse:
 
     for project_id in request.project_ids:
         try:
-            delete_project(project_id)
+            delete_project(project_id, workspace)
             deleted_count += 1
         except HTTPException as exc:
             failed_ids.append(project_id)
@@ -64,7 +68,10 @@ def batch_delete_projects(request: BatchDeleteRequest) -> BatchDeleteResponse:
     summary="批量校验项目",
     description="批量校验多个项目的 YAML 剧本。返回每个项目的校验结果。",
 )
-def batch_validate_projects(request: BatchDeleteRequest) -> dict:
+def batch_validate_projects(
+    request: BatchDeleteRequest,
+    workspace: str = Depends(get_workspace),
+) -> dict:
     """批量校验项目"""
     if len(request.project_ids) > 50:
         raise HTTPException(
@@ -78,7 +85,7 @@ def batch_validate_projects(request: BatchDeleteRequest) -> dict:
 
     for project_id in request.project_ids:
         try:
-            project = get_project_detail(project_id)
+            project = get_project_detail(project_id, workspace)
             validation = validate_script_yaml(project.current_yaml)
 
             results.append(
@@ -117,36 +124,45 @@ def batch_validate_projects(request: BatchDeleteRequest) -> dict:
     summary="获取项目统计信息",
     description="返回项目总览统计：总数、类型分布、生成模式分布等",
 )
-def get_batch_stats() -> dict:
+def get_batch_stats(
+    workspace: str = Depends(get_workspace),
+) -> dict:
     """获取批量统计信息"""
     from app.db.database import get_connection
 
     with get_connection() as conn:
         cursor = conn.cursor()
 
-        # 总项目数
-        cursor.execute("SELECT COUNT(*) FROM projects")
+        # 总项目数（按工作区）
+        cursor.execute("SELECT COUNT(*) FROM projects WHERE workspace = ?", (workspace,))
         total_count = cursor.fetchone()[0]
 
-        # 按类型统计
-        cursor.execute("SELECT genre, COUNT(*) FROM projects GROUP BY genre ORDER BY COUNT(*) DESC")
+        # 按类型统计（按工作区）
+        cursor.execute(
+            "SELECT genre, COUNT(*) FROM projects WHERE workspace = ? GROUP BY genre ORDER BY COUNT(*) DESC",
+            (workspace,),
+        )
         genre_stats = [{"genre": row[0], "count": row[1]} for row in cursor.fetchall()]
 
-        # 按生成模式统计
-        cursor.execute("SELECT generation_mode, COUNT(*) FROM projects GROUP BY generation_mode")
+        # 按生成模式统计（按工作区）
+        cursor.execute(
+            "SELECT generation_mode, COUNT(*) FROM projects WHERE workspace = ? GROUP BY generation_mode",
+            (workspace,),
+        )
         mode_stats = [{"mode": row[0], "count": row[1]} for row in cursor.fetchall()]
 
-        # 平均章节数
-        cursor.execute("SELECT AVG(chapter_count) FROM projects")
+        # 平均章节数（按工作区）
+        cursor.execute("SELECT AVG(chapter_count) FROM projects WHERE workspace = ?", (workspace,))
         avg_chapters = cursor.fetchone()[0] or 0
 
-        # 最近创建的5个项目
+        # 最近创建的5个项目（按工作区）
         cursor.execute("""
             SELECT id, title, genre, created_at
             FROM projects
+            WHERE workspace = ?
             ORDER BY created_at DESC
             LIMIT 5
-        """)
+        """, (workspace,))
         recent_projects = [
             {
                 "id": row[0],

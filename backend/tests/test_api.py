@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from app.config.settings import settings
 from app.main import app
 
-client = TestClient(app)
+client = TestClient(app, headers={"X-Workspace": "test-workspace"})
 
 
 def test_health_endpoint():

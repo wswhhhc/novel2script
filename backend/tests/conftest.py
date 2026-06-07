@@ -25,5 +25,5 @@ def test_client():
     # 初始化测试数据库
     init_database()
 
-    with TestClient(app) as client:
+    with TestClient(app, headers={"X-Workspace": "test-workspace"}) as client:
         yield client

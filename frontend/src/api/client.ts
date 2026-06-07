@@ -16,13 +16,20 @@ import type {
   ScriptVersionSummary,
   ValidationResponse,
 } from "./types";
+import { getWorkspace } from "../utils/workspace";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+
+function workspaceHeaders(): Record<string, string> {
+  const ws = getWorkspace();
+  return ws ? { "X-Workspace": ws } : {};
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
       "Content-Type": "application/json",
+      ...workspaceHeaders(),
       ...init?.headers,
     },
     ...init,
@@ -109,6 +116,7 @@ export async function generateScriptStream(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...workspaceHeaders(),
     },
     body: JSON.stringify({ title, genre, chapters }),
   });
@@ -187,7 +195,11 @@ export function restoreVersion(projectId: number, versionId: number) {
 }
 
 export async function exportProject(projectId: number, format: ExportFormat) {
-  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/export/${format}`);
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/export/${format}`, {
+    headers: {
+      ...workspaceHeaders(),
+    },
+  });
 
   if (!response.ok) {
     const contentType = response.headers.get("content-type") ?? "";

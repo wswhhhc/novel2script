@@ -1,4 +1,5 @@
 import { CopyPlus, Save } from "lucide-react";
+import { useEffect, useState } from "react";
 import { ChapterList } from "./components/ChapterList";
 import { ExportPanel } from "./components/ExportPanel";
 import { GenerationPanel } from "./components/GenerationPanel";
@@ -7,11 +8,36 @@ import { ProjectSidebar } from "./components/ProjectSidebar";
 import { SaveProjectDialog } from "./components/SaveProjectDialog";
 import { StatusBanner, type BannerTone } from "./components/StatusBanner";
 import { VersionHistory } from "./components/VersionHistory";
+import { WorkspaceBadge } from "./components/WorkspaceBadge";
+import { WorkspaceDialog } from "./components/WorkspaceDialog";
 import { YamlEditor } from "./components/YamlEditor";
 import { useProjects } from "./hooks/useProjects";
 import { useWorkspace } from "./hooks/useWorkspace";
+import { getWorkspace, setWorkspace } from "./utils/workspace";
 
 function App() {
+  const [workspace, setWorkspaceState] = useState<string>(() => getWorkspace());
+  const [showWorkspaceDialog, setShowWorkspaceDialog] = useState(!getWorkspace());
+
+  function handleWorkspaceConfirm(name: string) {
+    setWorkspace(name);
+    setWorkspaceState(name);
+    setShowWorkspaceDialog(false);
+  }
+
+  function handleSwitchWorkspace() {
+    setWorkspace("");
+    setWorkspaceState("");
+    setShowWorkspaceDialog(true);
+  }
+
+  // 工作区确认后自动加载项目列表
+  useEffect(() => {
+    if (workspace) {
+      projects.loadProjects();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspace]);
   const ws = useWorkspace();
   const projects = useProjects({
     get title() {
@@ -79,6 +105,7 @@ function App() {
           </p>
         </div>
         <div className="topbar-actions">
+          <WorkspaceBadge workspace={workspace} onChangeClick={handleSwitchWorkspace} />
           <div className="topbar-metrics" aria-label="工作台统计">
             <span>{ws.content.length.toLocaleString()} 字输入</span>
             <span>{ws.parseResult?.chapter_count ?? 0} 章</span>
@@ -184,6 +211,11 @@ function App() {
         mode={projects.saveDialogMode ?? "create"}
         onClose={() => projects.setSaveDialogMode(null)}
         onSubmit={projects.handleSaveDialogSubmit}
+      />
+
+      <WorkspaceDialog
+        open={showWorkspaceDialog}
+        onConfirm={handleWorkspaceConfirm}
       />
     </div>
   );

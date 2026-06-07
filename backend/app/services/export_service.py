@@ -12,8 +12,8 @@ FILENAME_SAFE_RE = re.compile(r'[\\/:*?"<>|\s]+')
 ASCII_FILENAME_RE = re.compile(r"[^A-Za-z0-9_.-]+")
 
 
-def export_project_yaml(project_id: int) -> Response:
-    project = get_project_detail(project_id)
+def export_project_yaml(project_id: int, workspace: str = "default") -> Response:
+    project = get_project_detail(project_id, workspace)
     filename = _build_filename(project.title, "yaml")
     return Response(
         content=project.current_yaml,
@@ -22,8 +22,8 @@ def export_project_yaml(project_id: int) -> Response:
     )
 
 
-def export_project_json(project_id: int) -> Response:
-    project = get_project_detail(project_id)
+def export_project_json(project_id: int, workspace: str = "default") -> Response:
+    project = get_project_detail(project_id, workspace)
     document = _parse_yaml(project.current_yaml)
     filename = _build_filename(project.title, "json")
     return Response(
@@ -33,8 +33,8 @@ def export_project_json(project_id: int) -> Response:
     )
 
 
-def export_project_markdown(project_id: int) -> Response:
-    project = get_project_detail(project_id)
+def export_project_markdown(project_id: int, workspace: str = "default") -> Response:
+    project = get_project_detail(project_id, workspace)
     document = _parse_yaml(project.current_yaml)
     markdown = _to_markdown(document)
     filename = _build_filename(project.title, "md")

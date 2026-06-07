@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from app.config.settings import settings
 from app.main import app
 
-client = TestClient(app)
+client = TestClient(app, headers={"X-Workspace": "test-workspace"})
 
 CHAPTERS = [
     {"id": "C001", "title": "第一章", "content": "正文一", "word_count": 3},
