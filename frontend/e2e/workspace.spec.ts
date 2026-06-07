@@ -52,7 +52,7 @@ test.describe("Novel2Script 核心流程", () => {
     // ── 手动校验 ──
     // 校验按钮在 YAML 编辑器工具栏中
     await page.getByRole("button", { name: /校验/ }).click();
-    await expect(page.getByText(/校验通过|校验失败/)).toBeVisible();
+    await expect(page.getByText(/校验通过|校验失败/).first()).toBeVisible();
 
     // ── 保存项目 ──
     await page.getByRole("button", { name: "保存" }).first().click();
