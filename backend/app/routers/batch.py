@@ -156,13 +156,16 @@ def get_batch_stats(
         avg_chapters = cursor.fetchone()[0] or 0
 
         # 最近创建的5个项目（按工作区）
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT id, title, genre, created_at
             FROM projects
             WHERE workspace = ?
             ORDER BY created_at DESC
             LIMIT 5
-        """, (workspace,))
+        """,
+            (workspace,),
+        )
         recent_projects = [
             {
                 "id": row[0],

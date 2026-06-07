@@ -58,12 +58,15 @@ def create_project(payload: ProjectCreateRequest, workspace: str = "default") ->
 
 def list_projects(workspace: str = "default") -> list[ProjectSummaryResponse]:
     with get_connection() as connection:
-        rows = connection.execute("""
+        rows = connection.execute(
+            """
             SELECT id, title, genre, chapter_count, generation_mode, created_at, updated_at
             FROM projects
             WHERE workspace = ?
             ORDER BY updated_at DESC, id DESC
-            """, (workspace,)).fetchall()
+            """,
+            (workspace,),
+        ).fetchall()
     return [_row_to_summary(row) for row in rows]
 
 
@@ -138,7 +141,9 @@ def delete_project(project_id: int, workspace: str = "default") -> dict[str, int
     return {"message": "项目已删除", "id": project_id}
 
 
-def create_version(project_id: int, payload: ScriptVersionCreateRequest, workspace: str = "default") -> ScriptVersionSummaryResponse:
+def create_version(
+    project_id: int, payload: ScriptVersionCreateRequest, workspace: str = "default"
+) -> ScriptVersionSummaryResponse:
     _get_project_row(project_id, workspace)
     validation = validate_script_yaml(payload.yaml)
     now = _now()

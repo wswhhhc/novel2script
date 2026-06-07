@@ -35,4 +35,4 @@ async def get_workspace(x_workspace: str = Header(default="default")) -> str:
 
 
 def _is_valid_workspace_name(name: str) -> bool:
-    return bool(re.match(r'^[\w一-鿿-]+$', name))
+    return bool(re.match(r"^[\w一-鿿-]+$", name))
