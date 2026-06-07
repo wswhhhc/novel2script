@@ -69,7 +69,8 @@ test.describe("Novel2Script 核心流程", () => {
     });
     await page.getByTitle("保存版本快照").click();
     await expect(page.getByText(/已保存版本：v1.0/)).toBeVisible();
-    await expect(page.getByText("v1.0")).toBeVisible();
+    // 版本列表中应显示版本名称
+    await expect(page.locator(".version-list strong").filter({ hasText: "v1.0" })).toBeVisible();
 
     // ── 导出剧本 ──
     for (const format of ["YAML", "JSON", "Markdown"]) {
