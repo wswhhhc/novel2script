@@ -62,7 +62,7 @@ test.describe("Novel2Script 核心流程", () => {
 
     // 删除项目1
     page.on("dialog", (dialog) => dialog.accept());
-    await page.getByLabel(`删除项目1`).click();
+    await page.getByLabel(`删除项目 项目1`).click();
     await expect(page.getByText("项目1")).not.toBeVisible();
   });
 
