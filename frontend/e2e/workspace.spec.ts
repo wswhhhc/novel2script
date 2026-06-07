@@ -12,9 +12,17 @@ const sampleNovel = `第一章 雨夜相逢
 废弃剧场里传来录音机的声音，旧剧本被藏在舞台地板下面。
 林晓意识到父亲当年留下的秘密，正是新故事的开端。`;
 
+async function enterWorkspace(page: import("@playwright/test").Page) {
+  // 工作区弹窗会在首次访问时弹出
+  await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
+  await page.getByPlaceholder("例如：my-project 或 张三").fill("e2e-test");
+  await page.getByRole("button", { name: "进入工作区" }).click();
+}
+
 test.describe("Novel2Script", () => {
   test("核心创作流程：输入 → 识别 → 生成 → 保存", async ({ page }) => {
     await page.goto("/");
+    await enterWorkspace(page);
     await expect(page.getByRole("heading", { name: "Novel2Script 工作台" })).toBeVisible();
 
     // 填写基本信息
@@ -39,6 +47,7 @@ test.describe("Novel2Script", () => {
 
   test("边界情况：空输入时按钮禁用", async ({ page }) => {
     await page.goto("/");
+    await enterWorkspace(page);
     await expect(page.getByRole("heading", { name: "Novel2Script 工作台" })).toBeVisible();
     await expect(page.getByRole("button", { name: /识别章节/ })).toBeDisabled();
     await expect(page.getByRole("button", { name: /生成剧本/ })).toBeDisabled();
