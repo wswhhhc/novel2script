@@ -68,9 +68,7 @@ export function WorkspaceDialog({ open, onConfirm }: WorkspaceDialogProps) {
           </div>
         </div>
 
-        <p className="modal-desc">
-          工作区用于隔离不同用户的数据。输入你的工作区名称，不同工作区之间的项目互不可见。
-        </p>
+        <p className="modal-desc">工作区用于隔离不同用户的数据。输入你的工作区名称，不同工作区之间的项目互不可见。</p>
 
         <label className="field">
           <span>工作区名称</span>

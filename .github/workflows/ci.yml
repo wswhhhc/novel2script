@@ -49,9 +49,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
+
+      - name: Downgrade npm to v9 (npm 10 crashes on GHA runner)
+        run: npm install -g npm@9
 
       - name: Set up Python for E2E backend
         uses: actions/setup-python@v5
@@ -59,27 +62,24 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: Install dependencies
+      - name: "Frontend: install & build"
         run: |
           python -m pip install -r backend/requirements.txt
           cd frontend
           npm ci
           npx playwright install --with-deps chromium
+          node node_modules/typescript/bin/tsc --noEmit
+          node node_modules/vite/bin/vite.js build
 
       - name: Run tests
         run: |
           cd frontend
-          npm run test --if-present
-
-      - name: Build production
-        run: |
-          cd frontend
-          npm run build
+          node node_modules/vitest/vitest.mjs run
 
       - name: Run E2E tests
         run: |
           cd frontend
-          npm run e2e
+          node node_modules/@playwright/test/cli.js test
 
       - name: Check code formatting
         run: |
