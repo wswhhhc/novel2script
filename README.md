@@ -23,7 +23,7 @@
   <tr>
     <td align="center" width="300">
       <strong>🎭 Novel2Script 工作台</strong><br><br>
-      <a href="http://120.53.0.252/novel2/">
+      <a href="120.53.0.252/novel2/">
         <img alt="Open workspace" src="https://img.shields.io/badge/Open-Workspace-2563eb?style=for-the-badge">
       </a>
     </td>
@@ -35,7 +35,7 @@
     </td>
     <td align="center" width="300">
       <strong>📋 API 文档（Swagger）</strong><br><br>
-      <a href="http://120.53.0.252/novel2-api/docs">
+      <a href="120.53.0.252/novel2-api/docs">
         <img alt="Open API docs" src="https://img.shields.io/badge/Open-Swagger%20Docs-7c3aed?style=for-the-badge">
       </a>
     </td>
