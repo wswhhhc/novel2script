@@ -29,7 +29,7 @@
     </td>
     <td align="center" width="300">
       <strong>⚡ 后端 API 健康检查</strong><br><br>
-      <a href="http://120.53.0.252/novel2-api/health">
+      <a href="120.53.0.252/novel2-api/health">
         <img alt="Check API health" src="https://img.shields.io/badge/API-Health%20Check-16a34a?style=for-the-badge">
       </a>
     </td>
