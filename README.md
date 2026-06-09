@@ -23,19 +23,19 @@
   <tr>
     <td align="center" width="300">
       <strong>🎭 Novel2Script 工作台</strong><br><br>
-      <a href="120.53.0.252/novel2/">
+      <a href="http://120.53.0.252/novel2/">
         <img alt="Open workspace" src="https://img.shields.io/badge/Open-Workspace-2563eb?style=for-the-badge">
       </a>
     </td>
     <td align="center" width="300">
       <strong>⚡ 后端 API 健康检查</strong><br><br>
-      <a href="120.53.0.252/novel2-api/health">
+      <a href="http://120.53.0.252/novel2-api/health">
         <img alt="Check API health" src="https://img.shields.io/badge/API-Health%20Check-16a34a?style=for-the-badge">
       </a>
     </td>
     <td align="center" width="300">
       <strong>📋 API 文档（Swagger）</strong><br><br>
-      <a href="120.53.0.252/novel2-api/docs">
+      <a href="http://120.53.0.252/novel2-api/docs">
         <img alt="Open API docs" src="https://img.shields.io/badge/Open-Swagger%20Docs-7c3aed?style=for-the-badge">
       </a>
     </td>
