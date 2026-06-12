@@ -3,7 +3,10 @@ PDF 导出服务
 将 YAML 剧本导出为专业格式的 PDF
 """
 
+import logging
+import os
 from io import BytesIO
+from pathlib import Path
 from typing import Any
 
 import yaml
@@ -26,17 +29,38 @@ from reportlab.platypus import (
 from app.exceptions import ValidationError
 from app.schemas.projects import ProjectDetailResponse
 
-# ── 注册中文字体（使用系统安装的 TrueType 字体）────────────────────────
-_CN_REGULAR = "/usr/share/texlive/texmf-dist/fonts/truetype/public/arphic-ttf/gbsn00lp.ttf"
-_CN_BOLD = "/usr/share/texlive/texmf-dist/fonts/truetype/public/arphic-ttf/gbsn00lp.ttf"
-_CN_FONT = "ARPL-SungtiL-GB"
-pdfmetrics.registerFont(TTFont(_CN_FONT, _CN_REGULAR))
-# 注册到 reportlab 字体映射系统，让 ParagraphStyle 能解析
-addMapping(_CN_FONT, 0, 0, _CN_FONT)  # normal
-addMapping(_CN_FONT, 1, 0, _CN_FONT)  # bold
-addMapping(_CN_FONT, 0, 1, _CN_FONT)  # italic
-addMapping(_CN_FONT, 1, 1, _CN_FONT)  # bold-italic
-# ────────────────────────────────────────────────────────────────────────
+logger = logging.getLogger(__name__)
+
+# ── 中文字体配置（延迟注册，字体缺失时降级为 Helvetica）────────────────
+_CN_FONT = "Helvetica"  # 降级默认值
+_CN_FONT_READY = False
+
+
+def _register_cn_font() -> None:
+    """尝试注册中文字体。失败时不报错，保持 Helvetica 降级。"""
+    global _CN_FONT, _CN_FONT_READY
+
+    ttf_path = os.getenv(
+        "CN_TTF_PATH",
+        "/usr/share/texlive/texmf-dist/fonts/truetype/public/arphic-ttf/gbsn00lp.ttf",
+    )
+    p = Path(ttf_path)
+    if not p.exists():
+        logger.warning("中文字体文件 %s 不存在，PDF 中文可能无法正常显示", ttf_path)
+        return
+
+    font_name = "ARPL-SungtiL-GB"
+    try:
+        pdfmetrics.registerFont(TTFont(font_name, str(p)))
+        addMapping(font_name, 0, 0, font_name)
+        addMapping(font_name, 1, 0, font_name)
+        addMapping(font_name, 0, 1, font_name)
+        addMapping(font_name, 1, 1, font_name)
+        _CN_FONT = font_name
+        _CN_FONT_READY = True
+        logger.info("已注册中文字体：%s", ttf_path)
+    except Exception as exc:
+        logger.warning("注册中文字体失败：%s，PDF 中文可能无法正常显示", exc)
 
 
 def export_project_pdf(project: ProjectDetailResponse) -> bytes:
@@ -61,6 +85,11 @@ def export_project_pdf(project: ProjectDetailResponse) -> bytes:
         raise ValidationError("YAML 格式错误：缺少 script 顶层字段")
 
     script = script_data["script"]
+
+    # 懒加载中文字体（仅在首次导出时尝试注册，失败降级不崩溃）
+    if not _CN_FONT_READY:
+        _register_cn_font()
+
     buffer = BytesIO()
 
     # 创建 PDF 文档
