@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from app.exceptions import ValidationError
-from app.schemas.projects import ProjectDetailResponse, ProjectSummaryResponse
+from app.schemas.projects import ProjectDetailResponse
 from app.schemas.requests import ChapterInput
 from app.schemas.responses import ValidationResponse
 from app.services.pdf_export_service import export_project_pdf

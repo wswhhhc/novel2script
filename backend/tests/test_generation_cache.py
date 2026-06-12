@@ -2,11 +2,8 @@
 测试生成缓存服务
 """
 
-import json
 import tempfile
 from pathlib import Path
-
-import pytest
 
 from app.services.generation_cache import get_cached_stage, set_cached_stage
 
