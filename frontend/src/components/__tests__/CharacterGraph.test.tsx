@@ -70,7 +70,13 @@ describe("CharacterGraph", () => {
     (yaml.load as ReturnType<typeof vi.fn>).mockReturnValue({
       script: {
         characters: [
-          { id: "CHAR001", name: "张三", role: "主角", description: "男主", relationships: [{ character_id: "CHAR002", type: "朋友" }] },
+          {
+            id: "CHAR001",
+            name: "张三",
+            role: "主角",
+            description: "男主",
+            relationships: [{ character_id: "CHAR002", type: "朋友" }],
+          },
           { id: "CHAR002", name: "李四", role: "配角", description: "好友", relationships: [] },
         ],
         scenes: [],
