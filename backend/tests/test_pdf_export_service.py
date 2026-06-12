@@ -132,8 +132,10 @@ script:
   adaptation_notes: []
   open_questions: []
 """
-    with patch("app.services.pdf_export_service.SimpleDocTemplate") as mock_cls, \
-         patch("app.services.pdf_export_service.BytesIO") as mock_bio:
+    with (
+        patch("app.services.pdf_export_service.SimpleDocTemplate") as mock_cls,
+        patch("app.services.pdf_export_service.BytesIO") as mock_bio,
+    ):
         mock_bio_instance = MagicMock()
         mock_bio_instance.getvalue.return_value = b"pdf"
         mock_bio.return_value = mock_bio_instance
