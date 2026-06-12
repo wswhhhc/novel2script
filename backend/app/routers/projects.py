@@ -211,12 +211,12 @@ def export_pdf_endpoint(
     workspace: str = Depends(get_workspace),
 ) -> Response:
     """导出 PDF 格式"""
-    from app.services.export_service import _build_filename
+    from app.services.export_service import _build_filename, _content_disposition
 
     project = get_project_detail(project_id, workspace)
     pdf_bytes = export_project_pdf(project)
 
     filename = _build_filename(project.title, "pdf")
-    headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
+    headers = {"Content-Disposition": _content_disposition(filename)}
 
     return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)

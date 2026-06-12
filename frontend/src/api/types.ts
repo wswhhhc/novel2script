@@ -124,7 +124,7 @@ export interface RestoreVersionResponse extends ProjectDetail {
   restored_from_version: number;
 }
 
-export type ExportFormat = "yaml" | "json" | "markdown";
+export type ExportFormat = "yaml" | "json" | "markdown" | "pdf";
 
 export interface DemoInfo {
   title: string;

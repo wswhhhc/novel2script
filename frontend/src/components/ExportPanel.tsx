@@ -11,6 +11,7 @@ const formats: Array<{ label: string; value: ExportFormat }> = [
   { label: "YAML", value: "yaml" },
   { label: "JSON", value: "json" },
   { label: "Markdown", value: "markdown" },
+  { label: "PDF", value: "pdf" },
 ];
 
 export function ExportPanel({ disabled, exporting, onExport }: ExportPanelProps) {

@@ -2,10 +2,11 @@ import { FileCode2, ScanText } from "lucide-react";
 import type { GenerationModeResponse } from "../api/types";
 
 const generationSteps = [
-  { label: "分析章节内容", percent: 30 },
-  { label: "生成角色表和场景", percent: 60 },
-  { label: "生成完整剧本", percent: 90 },
-  { label: "校验和修复", percent: 100 },
+  { label: "章节分析", percent: 20 },
+  { label: "角色提取", percent: 38 },
+  { label: "场景规划", percent: 55 },
+  { label: "剧本生成", percent: 78 },
+  { label: "校验与修复", percent: 100 },
 ];
 
 interface GenerationPanelProps {

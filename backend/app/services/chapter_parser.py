@@ -45,7 +45,8 @@ def parse_chapters(content: str) -> ChapterParseResult:
 
     matches = list(CHAPTER_TITLE_RE.finditer(text))
     if not matches:
-        # TODO: 后续阶段接入 AI 智能识别和用户手动标注章节边界。
+        # 当前仅支持正则识别。如需支持无标准格式的混合排版，
+        # 可考虑增加 AI 辅助识别（调用 ai_client）或前端手动标注功能。
         return ChapterParseResult(
             chapter_count=0,
             valid=False,

@@ -203,7 +203,8 @@ graph TB
 | **YAML** | 机器可读、版本控制 | 原始格式，保留完整结构 |
 | **JSON** | API 集成、数据处理 | 标准化数据交换格式 |
 | **Markdown** | 人类阅读、打印分享 | 格式化排版，包含角色表、场景列表 |
-| **PDF** | 答辩展示、打印归档 | 封面、角色表、场景与对白排版 |
+| **PDF** | 答辩展示、打印归档 | 封面、角色表、场景与对白排版（支持中文字体） |
+| **Word** | 文档编辑 | 待开发 |
 
 ---
 
@@ -467,6 +468,7 @@ def _trim_chapters_for_ai_prompt(chapters):
 | Mock 生成 | ~40ms | 读取示例 YAML 文件 |
 | AI 生成（3章，5000字） | 45-60s | 取决于 AI API 延迟和模型速度 |
 | Schema 校验 | ~40ms | jsonschema 验证 + 业务规则检查 |
+| PDF 导出 | ~200ms | 含中文字体嵌入和字符表/场景排版 |
 | 项目保存 | ~80ms | SQLite 写入 + 事务提交 |
 | YAML 导出 | ~15ms | 文本读取 |
 | JSON 导出 | ~50ms | YAML 解析 + JSON 序列化 |
@@ -637,6 +639,8 @@ python -m pytest backend/tests --cov=app --cov-report=html
 - ✅ 章节解析器（20+ 测试用例）
 - ✅ YAML Schema 校验（有效/无效 fixture）
 - ✅ API 端点（集成测试）
+- ✅ 生成缓存读写（7 个测试用例）
+- ✅ PDF 导出格式与错误处理（5 个测试用例）
 
 ### 前端测试
 
@@ -742,6 +746,7 @@ bash scripts/smoke-test.sh
 ### 短期计划（v2.0）
 - [ ] 支持更多剧本类型（电影、广播剧、动画）
 - [x] 角色关系图可视化（基于 @xyflow/react）
+- [x] PDF 导出中文支持（基于 reportlab + Arphic TrueType 字体）
 - [ ] 场景卡片式编辑器
 - [ ] Word 剧本文档导出
 

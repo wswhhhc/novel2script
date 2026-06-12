@@ -11,6 +11,9 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.fonts import addMapping
 from reportlab.platypus import (
     PageBreak,
     Paragraph,
@@ -22,6 +25,18 @@ from reportlab.platypus import (
 
 from app.exceptions import ValidationError
 from app.schemas.projects import ProjectDetailResponse
+
+# ── 注册中文字体（使用系统安装的 TrueType 字体）────────────────────────
+_CN_REGULAR = "/usr/share/texlive/texmf-dist/fonts/truetype/public/arphic-ttf/gbsn00lp.ttf"
+_CN_BOLD = "/usr/share/texlive/texmf-dist/fonts/truetype/public/arphic-ttf/gbsn00lp.ttf"
+_CN_FONT = "ARPL-SungtiL-GB"
+pdfmetrics.registerFont(TTFont(_CN_FONT, _CN_REGULAR))
+# 注册到 reportlab 字体映射系统，让 ParagraphStyle 能解析
+addMapping(_CN_FONT, 0, 0, _CN_FONT)  # normal
+addMapping(_CN_FONT, 1, 0, _CN_FONT)  # bold
+addMapping(_CN_FONT, 0, 1, _CN_FONT)  # italic
+addMapping(_CN_FONT, 1, 1, _CN_FONT)  # bold-italic
+# ────────────────────────────────────────────────────────────────────────
 
 
 def export_project_pdf(project: ProjectDetailResponse) -> bytes:
@@ -66,6 +81,7 @@ def export_project_pdf(project: ProjectDetailResponse) -> bytes:
     title_style = ParagraphStyle(
         "CustomTitle",
         parent=styles["Heading1"],
+        fontName=_CN_FONT,
         fontSize=24,
         textColor=colors.HexColor("#1a202c"),
         spaceAfter=30,
@@ -75,6 +91,7 @@ def export_project_pdf(project: ProjectDetailResponse) -> bytes:
     heading_style = ParagraphStyle(
         "CustomHeading",
         parent=styles["Heading2"],
+        fontName=_CN_FONT,
         fontSize=16,
         textColor=colors.HexColor("#2d3748"),
         spaceAfter=12,
@@ -84,13 +101,15 @@ def export_project_pdf(project: ProjectDetailResponse) -> bytes:
     body_style = ParagraphStyle(
         "CustomBody",
         parent=styles["BodyText"],
+        fontName=_CN_FONT,
         fontSize=11,
-        leading=14,
+        leading=16,
     )
 
     dialogue_style = ParagraphStyle(
         "Dialogue",
         parent=styles["BodyText"],
+        fontName=_CN_FONT,
         fontSize=11,
         leftIndent=20,
         spaceAfter=6,
@@ -135,8 +154,9 @@ def export_project_pdf(project: ProjectDetailResponse) -> bytes:
                     ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e2e8f0")),
                     ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#1a202c")),
                     ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("FONTNAME", (0, 0), (-1, -1), _CN_FONT),
                     ("FONTSIZE", (0, 0), (-1, 0), 11),
+                    ("FONTSIZE", (0, 1), (-1, -1), 10),
                     ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
                     ("BACKGROUND", (0, 1), (-1, -1), colors.white),
                     ("GRID", (0, 0), (-1, -1), 1, colors.HexColor("#cbd5e0")),
